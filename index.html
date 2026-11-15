@@ -3871,6 +3871,7 @@ function renderStart(){
       <button class="soft" id="sy" type="button">💬 Sayings</button>
       <button class="soft" id="mr" type="button">🐺 Moon Run${wordsPlayed()<GAME_UNLOCK?` 🔒 ${wordsPlayed()}/${GAME_UNLOCK}`:''}</button>
       ${sp?`<button class="soft" id="sp" type="button">✏️ Spelling practice (${sp})</button>`:''}
+      ${STANDALONE?'<a class="soft" href="../maths-moon/" style="text-decoration:none">🔢 Maths Moon</a>':''}
     </div>
     <button class="pill" id="readMode" type="button" aria-pressed="${state.readMode!=='needed'}">🔊 Read aloud: ${state.readMode==='needed'?'only when needed':'everything'}</button>
     <p class="vnote">${esc(voiceNote())}</p>
@@ -4554,6 +4555,6 @@ if(!who) view='who';
 render();
 })();
 </script>
-<script>if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('sw.js?v=202611150054').catch(function(){});});}</script>
+<script>if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('sw.js?v=202611150058').catch(function(){});});}</script>
 </body>
 </html>
