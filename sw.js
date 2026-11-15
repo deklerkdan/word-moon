@@ -1,5 +1,5 @@
 // Word Moon offline helper: always tries the internet first (so updates arrive), and falls back to the saved copy offline.
-const CACHE = 'word-moon-202611150023';
+const CACHE = 'word-moon-202611150043';
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(['./', 'index.html', 'manifest.webmanifest', 'icon.svg', 'icon-192.png'])).then(() => self.skipWaiting()));
 });

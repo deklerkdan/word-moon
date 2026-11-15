@@ -4402,6 +4402,7 @@ function renderGrown(){
   <div class="panel"><h3>Copy progress</h3><div class="row"><button class="pill" type="button" id="copy">Copy progress</button><span id="copied" style="color:var(--muted);font-size:14px"></span></div><div id="copyBox"></div></div>
   <div class="panel"><h3>Backup</h3><p>A backup code holds every name’s words and moons. Copy it to keep progress safe, or to move it to another phone or browser: open Word Moon there, paste the code below and tap Load backup.</p>
     <div class="row"><button class="pill" type="button" id="bkCopy">Copy backup code</button><span id="bkMsg" style="color:var(--muted);font-size:14px"></span></div><div id="bkBox"></div>
+    ${STANDALONE?'<div class="row"><button class="pill" type="button" id="bkPaste">📋 Paste backup code</button></div>':''}
     <textarea id="bkIn" placeholder="Paste a backup code here" aria-label="Backup code to load"></textarea>
     <div class="row"><button class="pill${restoreArmed?' danger':''}" type="button" id="bkLoad">${restoreArmed?esc(restoreArmed.msg):'Load backup'}</button></div></div>
   <div class="panel"><h3>Names</h3><p>Playing now: <b>${esc(playerName())}</b>. Each name keeps its own progress${uid?' (saved on this device and to this Claude account)':' (saved on this device)'}.</p>
@@ -4418,8 +4419,10 @@ function renderGrown(){
   stage.querySelectorAll('[data-per]').forEach(b=>b.onclick=()=>{ state.perRound=+b.dataset.per; if(sess) sess.limit=state.perRound; save(); render(); });
   $('#copy').onclick=()=>{ const txt=progressText(); const done=()=>{ $('#copied').textContent='Copied.'; };
     try{ navigator.clipboard.writeText(txt).then(done,()=>showBox(txt)); }catch(e){ showBox(txt); } };
-  $('#bkCopy').onclick=()=>{ const txt=backupCode(); const done=()=>{ $('#bkMsg').textContent='Copied. Keep it somewhere safe, like an email to yourself.'; };
+  $('#bkCopy').onclick=async()=>{ $('#bkMsg').textContent='Getting every name’s progress…'; const txt=await backupCode();
+    const done=()=>{ $('#bkMsg').textContent='Copied. Keep it somewhere safe, like an email to yourself.'; };
     try{ navigator.clipboard.writeText(txt).then(done,()=>bkShow(txt)); }catch(e){ bkShow(txt); } };
+  const bkp=$('#bkPaste'); if(bkp) bkp.onclick=async()=>{ try{ const t=await navigator.clipboard.readText(); if(t){ $('#bkIn').value=t; $('#bkLoad').click(); } }catch(e){ $('#bkMsg').textContent='Press and hold in the box below, then tap Paste.'; $('#bkIn').focus(); } };
   if(restoreArmed) $('#bkIn').value=restoreArmed.code;
   $('#bkLoad').onclick=()=>{ const code=$('#bkIn').value; const d=readBackup(code);
     if(!d){ restoreArmed=null; render(); $('#bkMsg').textContent='That isn’t a Word Moon backup code. Copy the whole code and try again.'; return; }
@@ -4446,9 +4449,13 @@ function betterVoiceTips(){
 }
 /* Backup codes: every name's progress in one piece of text, to move between devices or browsers. */
 let restoreArmed=null;
-function backupCode(){
+async function backupCode(){
   persistLocal();
-  const all=players.map(p=>({id:p.id, name:p.name, state:p.id===who?state:lsGet(STORE+':'+p.id,null)})).filter(x=>x.state);
+  const all=players.map(p=>({id:p.id, name:p.name, state:p.id===who?state:lsGet(STORE+':'+p.id,null)}));
+  /* Names played on another device may only be in Claude's saving: fetch the newer copy from there. */
+  if(db && uid){ for(const x of all){ if(x.id===who) continue;
+    try{ const snap=await timeout(db.doc(profilePath(x.id)).get(), 6000); if(snap.exists){ const r=migrate((snap.data()||{}).state); if(r && (!x.state || (r.updatedAt||0)>(x.state.updatedAt||0))) x.state=r; } }catch(e){} } }
+  for(let i=all.length-1;i>=0;i--) if(!all[i].state) all.splice(i,1);
   const json=JSON.stringify({app:'word-moon', v:1, at:Date.now(), players:all});
   return 'WORDMOON1:'+btoa(unescape(encodeURIComponent(json)));
 }
@@ -4537,6 +4544,6 @@ if(!who) view='who';
 render();
 })();
 </script>
-<script>if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('sw.js?v=202611150023').catch(function(){});});}</script>
+<script>if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('sw.js?v=202611150043').catch(function(){});});}</script>
 </body>
 </html>
