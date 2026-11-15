@@ -4402,7 +4402,7 @@ function renderGrown(){
     <div><span>Words in the game: ${AW().length}. More can be added.</span></div></div></div>
   <div class="panel"><h3>Copy progress</h3><div class="row"><button class="pill" type="button" id="copy">Copy progress</button><span id="copied" style="color:var(--muted);font-size:14px"></span></div><div id="copyBox"></div></div>
   <div class="panel"><h3>Backup</h3><p>A backup code holds every name’s words and moons. Copy it to keep progress safe, or to move it to another phone or browser: open Word Moon there, paste the code below and tap Load backup.</p>
-    <div class="row"><button class="pill" type="button" id="bkCopy">Copy backup code</button><span id="bkMsg" style="color:var(--muted);font-size:14px"></span></div><div id="bkBox"></div>
+    <div class="row"><button class="pill" type="button" id="bkCopy">Copy backup code</button>${STANDALONE?'':'<button class="pill" type="button" id="bkMove">🚀 Move to the Word Moon website</button>'}<span id="bkMsg" style="color:var(--muted);font-size:14px"></span></div><div id="bkBox"></div>
     ${STANDALONE?'<div class="row"><button class="pill" type="button" id="bkPaste">📋 Paste backup code</button></div>':''}
     <textarea id="bkIn" placeholder="Paste a backup code here" aria-label="Backup code to load"></textarea>
     <div class="row"><button class="pill${restoreArmed?' danger':''}" type="button" id="bkLoad">${restoreArmed?esc(restoreArmed.msg):'Load backup'}</button></div></div>
@@ -4423,10 +4423,14 @@ function renderGrown(){
   $('#bkCopy').onclick=async()=>{ $('#bkMsg').textContent='Getting every name’s progress…'; const txt=await backupCode();
     const done=()=>{ $('#bkMsg').textContent='Copied. Keep it somewhere safe, like an email to yourself.'; };
     try{ navigator.clipboard.writeText(txt).then(done,()=>bkShow(txt)); }catch(e){ bkShow(txt); } };
+  const bkm=$('#bkMove'); if(bkm) bkm.onclick=async()=>{ $('#bkMsg').textContent='Getting every name’s progress…'; const txt=await backupCode();
+    $('#bkBox').innerHTML=`<a class="big" style="text-decoration:none;display:inline-block" target="_blank" rel="noopener" href="https://deklerkdan.github.io/word-moon/#restore=${encodeURIComponent(txt)}">Open the website with this progress ↗</a>`;
+    $('#bkMsg').textContent='Tap the button. On the website, tap the Backup button again to confirm.'; };
   const bkp=$('#bkPaste'); if(bkp) bkp.onclick=async()=>{ try{ const t=await navigator.clipboard.readText(); if(t){ $('#bkIn').value=t; $('#bkLoad').click(); } }catch(e){ $('#bkMsg').textContent='Press and hold in the box below, then tap Paste.'; $('#bkIn').focus(); } };
   if(restoreArmed) $('#bkIn').value=restoreArmed.code;
   $('#bkLoad').onclick=async()=>{ const code=$('#bkIn').value; const d=await readBackup(code);
-    if(!d){ restoreArmed=null; render(); $('#bkMsg').textContent='That isn’t a Word Moon backup code. Copy the whole code and try again.'; return; }
+    if(!d){ restoreArmed=null; render(); $('#bkIn').value=code; const n=String(code||'').replace(/\s+/g,'').length;
+      $('#bkMsg').textContent=n?`That isn’t a whole Word Moon backup code (${n} characters came through; it may have been cut short). Copy the whole code and try again.`:'Nothing was pasted. Press and hold in the box, then tap Paste.'; return; }
     if(!restoreArmed || restoreArmed.code!==code){ const same=d.players.filter(p=>players.some(x=>x.name.toLowerCase()===String(p.name).toLowerCase())).map(p=>p.name);
       restoreArmed={code, msg: same.length?'Tap again: replaces progress for '+same.join(', '):'Tap again to add '+d.players.map(p=>p.name).join(', ')}; render(); return; }
     restoreArmed=null; const n=loadBackup(d); render(); $('#bkMsg').textContent='Loaded '+n+' name'+(n===1?'':'s')+'.'; };
@@ -4553,8 +4557,12 @@ window.addEventListener('resize',()=>requestAnimationFrame(fitBig));
 appReady=true;
 if(!who) view='who';
 render();
+/* A move link (...#restore=<backup code>) opens Backup with the code ready, waiting for a tap to confirm.
+   The part after # is never sent to the website's server; it stays on this phone, and is removed from the address at once. */
+if(STANDALONE){ try{ if(/^#restore=/.test(location.hash)){ const code=decodeURIComponent(location.hash.slice(9)); history.replaceState(null,'',location.pathname+location.search);
+  openGrown(); const t=$('#bkIn'); if(t){ t.value=code; $('#bkLoad').click(); setTimeout(()=>{ const b=$('#bkLoad'); if(b) b.scrollIntoView({block:'center'}); },500); } } }catch(e){} }
 })();
 </script>
-<script>if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('sw.js?v=202611150058').catch(function(){});});}</script>
+<script>if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('sw.js?v=202611150059').catch(function(){});});}</script>
 </body>
 </html>
