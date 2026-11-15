@@ -4424,7 +4424,7 @@ function renderGrown(){
     try{ navigator.clipboard.writeText(txt).then(done,()=>bkShow(txt)); }catch(e){ bkShow(txt); } };
   const bkp=$('#bkPaste'); if(bkp) bkp.onclick=async()=>{ try{ const t=await navigator.clipboard.readText(); if(t){ $('#bkIn').value=t; $('#bkLoad').click(); } }catch(e){ $('#bkMsg').textContent='Press and hold in the box below, then tap Paste.'; $('#bkIn').focus(); } };
   if(restoreArmed) $('#bkIn').value=restoreArmed.code;
-  $('#bkLoad').onclick=()=>{ const code=$('#bkIn').value; const d=readBackup(code);
+  $('#bkLoad').onclick=async()=>{ const code=$('#bkIn').value; const d=await readBackup(code);
     if(!d){ restoreArmed=null; render(); $('#bkMsg').textContent='That isn’t a Word Moon backup code. Copy the whole code and try again.'; return; }
     if(!restoreArmed || restoreArmed.code!==code){ const same=d.players.filter(p=>players.some(x=>x.name.toLowerCase()===String(p.name).toLowerCase())).map(p=>p.name);
       restoreArmed={code, msg: same.length?'Tap again: replaces progress for '+same.join(', '):'Tap again to add '+d.players.map(p=>p.name).join(', ')}; render(); return; }
@@ -4457,11 +4457,21 @@ async function backupCode(){
     try{ const snap=await timeout(db.doc(profilePath(x.id)).get(), 6000); if(snap.exists){ const r=migrate((snap.data()||{}).state); if(r && (!x.state || (r.updatedAt||0)>(x.state.updatedAt||0))) x.state=r; } }catch(e){} } }
   for(let i=all.length-1;i>=0;i--) if(!all[i].state) all.splice(i,1);
   const json=JSON.stringify({app:'word-moon', v:1, at:Date.now(), players:all});
+  /* WORDMOON2 is the same thing squeezed (gzip), about a tenth of the length. WORDMOON1 is plain, for older browsers. */
+  try{ if(window.CompressionStream){ const buf=await new Response(new Blob([json]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer();
+    const b=new Uint8Array(buf); let s=''; for(let i=0;i<b.length;i+=8192) s+=String.fromCharCode.apply(null, b.subarray(i,i+8192));
+    return 'WORDMOON2:'+btoa(s); } }catch(e){}
   return 'WORDMOON1:'+btoa(unescape(encodeURIComponent(json)));
 }
-function readBackup(code){
-  const m=String(code||'').replace(/\s+/g,'').match(/WORDMOON1:([A-Za-z0-9+\/=]+)/); if(!m) return null;
-  try{ const d=JSON.parse(decodeURIComponent(escape(atob(m[1])))); return d && Array.isArray(d.players) && d.players.length ? d : null; }catch(e){ return null; }
+async function readBackup(code){
+  const m=String(code||'').replace(/\s+/g,'').match(/WORDMOON([12]):([A-Za-z0-9+\/=]+)/); if(!m) return null;
+  try{
+    let json;
+    if(m[1]==='2'){ const s=atob(m[2]); const b=new Uint8Array(s.length); for(let i=0;i<s.length;i++) b[i]=s.charCodeAt(i);
+      json=await new Response(new Blob([b]).stream().pipeThrough(new DecompressionStream('gzip'))).text(); }
+    else json=decodeURIComponent(escape(atob(m[2])));
+    const d=JSON.parse(json); return d && Array.isArray(d.players) && d.players.length ? d : null;
+  }catch(e){ return null; }
 }
 function loadBackup(d){
   let n=0;
@@ -4544,6 +4554,6 @@ if(!who) view='who';
 render();
 })();
 </script>
-<script>if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('sw.js?v=202611150043').catch(function(){});});}</script>
+<script>if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('sw.js?v=202611150054').catch(function(){});});}</script>
 </body>
 </html>
