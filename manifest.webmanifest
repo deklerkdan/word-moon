@@ -1,0 +1,16 @@
+{
+  "name": "Luna's Word Moon",
+  "short_name": "Word Moon",
+  "description": "A word game: read it, know it, spell it, and fill the moon.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#07080B",
+  "theme_color": "#07080B",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
