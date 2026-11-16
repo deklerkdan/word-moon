@@ -36,29 +36,86 @@
 [hidden]{display:none!important}
 html,body{background:var(--bg)}
 body{color:var(--ink);font-family:var(--font-body);font-size:18px;line-height:1.5}
-.app{max-width:780px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;gap:16px;
-  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 40px}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+.app{max-width:780px;margin:0 auto;height:100vh;height:100dvh;display:flex;flex-direction:column;gap:8px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:8px 10px}
 h1,h2,h3{font-family:var(--font-display);font-weight:800;line-height:1.15;margin:0;text-wrap:balance}
 p{margin:0}
 button{font:inherit;color:inherit;cursor:pointer;background:none;border:0}
 :focus-visible{outline:3px solid var(--moon);outline-offset:3px}
 
-.top{display:flex;align-items:center;gap:10px;min-height:48px}
-.moons{display:flex;gap:4px;flex-wrap:wrap;flex:1;min-width:0;font-size:22px;line-height:1}
-.moons span{display:inline-flex;transition:transform .3s}
-.moons span.now{transform:translateY(-4px) scale(1.2)}
+/* the header: back (left), reading aloud (middle), grown-ups (right) */
+.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;min-height:52px;flex:none}
+.tl{justify-self:start} .tr{justify-self:end}
+.backbtn{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:var(--panel2);border:2px solid var(--line2);font-size:28px;font-weight:800;line-height:1}
+.sndbtn{display:flex;flex-direction:column;align-items:center;gap:0;padding:4px 14px;border-radius:18px;border:2px solid var(--line2);background:var(--panel2);min-width:96px}
+.sndbtn span{font-size:24px;line-height:1.1} .sndbtn small{font-size:12px;color:var(--muted);white-space:nowrap}
 .mn{width:1em;height:1em;vertical-align:-0.14em;flex:none}
-@media (max-width:600px){.top{flex-wrap:wrap;justify-content:flex-end}.moons{order:5;flex-basis:100%;justify-content:center}}
 .iconbtn{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:var(--panel2);border:2px solid var(--line);font-size:22px;flex:none}
 .grown{position:relative;overflow:hidden;font-size:13px;color:var(--muted);padding:8px 12px;border-radius:999px;border:1px solid var(--line);flex:none}
 .grown .fill{position:absolute;inset:0;width:0;background:var(--moon-soft);z-index:0}
 .grown span{position:relative}
 .snd{margin:0;background:var(--try-soft);border:1px solid var(--try);color:var(--ink);border-radius:14px;padding:10px 14px;font-size:15px}
 
-main{flex:1;display:flex;flex-direction:column;gap:22px}
+main{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
+main>section{flex:1;min-height:0}
 
-.hero{display:flex;flex-direction:column;align-items:center;text-align:center;gap:18px;padding-top:4vh}
-.moonwolf{position:relative;width:min(240px,60vw);aspect-ratio:1;max-width:100%}
+.hero{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px}
+.moonwolf{position:relative;width:min(220px,55vw,28dvh);aspect-ratio:1;max-width:100%;flex:none}
+/* home screen: one button per game */
+.hub{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(12px,3dvh,26px)}
+.hubbtn{width:min(340px,86vw);height:clamp(84px,19dvh,150px);border-radius:28px;background:var(--panel2);border:3px solid var(--line2);display:flex;align-items:center;justify-content:center;gap:18px;color:var(--ink);text-decoration:none}
+.hubbtn span{font-size:clamp(40px,9dvh,64px);line-height:1} .hubbtn b{font-family:var(--font-display);font-size:clamp(28px,5dvh,40px)}
+.hubbtn:active{transform:scale(.97)}
+/* a game's main screen: the icon, then joined block buttons */
+.gmain{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(14px,3dvh,28px)}
+.blocks{display:grid;width:min(600px,100%);gap:3px;background:var(--line2);border:3px solid var(--line2);border-radius:24px;overflow:hidden}
+.blocks.four{grid-template-columns:repeat(4,minmax(0,1fr))} .blocks.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.blk{position:relative;background:var(--panel2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:10px 4px;min-height:clamp(80px,14dvh,118px);text-align:center}
+.blk span{font-size:clamp(28px,5dvh,42px);line-height:1} .blk b{font-family:var(--font-display);font-size:clamp(13px,3.6vw,18px);line-height:1.15}
+.blk.main{background:var(--moon);color:#1B1606} .blk.main span{font-weight:800}
+.blk i{position:absolute;top:4px;right:6px;font-style:normal;font-size:14px}
+.blk:active{filter:brightness(1.2)}
+/* the four answers: a circle cut into quarters (no, sort of, yes, full moon); the half circle has only the bottom two */
+.quad{--qs:min(74vw,34dvh,300px);display:grid;grid-template-columns:1fr 1fr;gap:6px;width:var(--qs);height:var(--qs);flex:none}
+.quad.half{height:calc(var(--qs) / 2)}
+.q{display:flex;flex-direction:column;align-items:center;justify-content:center;border:3px solid;font-weight:800;min-width:0;min-height:0}
+.q .qi{font-size:calc(var(--qs) * .16);line-height:1.05} .q small{font-size:13px;font-weight:700;color:var(--ink);line-height:1.1}
+.q-no{border-radius:100% 0 0 0;color:var(--no);background:var(--no-soft);padding:16% 0 0 16%}
+.q-sort{border-radius:0 100% 0 0;color:var(--try);background:var(--try-soft);padding:16% 16% 0 0}
+.q-yes{border-radius:0 0 0 100%;color:var(--good);background:var(--good-soft);padding:0 0 16% 16%}
+.q-full{border-radius:0 0 100% 0;color:var(--moon);background:var(--moon-soft);padding:0 16% 16% 0}
+.q-full .qi .mn{width:1em;height:1em}
+.q:active,.q.hot{filter:brightness(1.5)}
+.q[disabled]{opacity:.35}
+.nextbtn{width:76px;height:76px;border-radius:50%;background:var(--moon);color:#1B1606;font-size:40px;font-weight:800;display:grid;place-items:center;flex:none;box-shadow:0 0 0 6px var(--moon-soft)}
+.spelt{font-family:var(--font-display);font-size:clamp(26px,7vw,40px);letter-spacing:.12em;color:var(--moon)}
+/* pages of a list (no scrolling) */
+.pager{display:flex;align-items:center;justify-content:center;gap:16px;flex:none}
+.pager button{width:52px;height:52px;border-radius:50%;border:2px solid var(--line2);background:var(--panel2);font-size:24px;font-weight:800}
+.pager button[disabled]{opacity:.25}
+.pager span{color:var(--muted);font-size:15px;min-width:5ch;text-align:center}
+.listpage{display:flex;flex-direction:column;gap:10px;align-items:center}
+.ptitle{font-family:var(--font-display);font-size:clamp(22px,5vw,30px);display:flex;gap:10px;align-items:center;flex:none}
+.wgrid{display:grid;gap:8px;width:100%;align-content:start;flex:1;min-height:0}
+.wgrid .chip{justify-content:center;font-size:17px;min-height:38px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;width:min(600px,100%)}
+.tile{background:var(--panel);border:2px solid var(--line2);border-radius:20px;padding:12px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center}
+.tile b{font-size:clamp(36px,7dvh,54px);line-height:1.1} .tile .n{font-family:var(--font-display);font-size:26px} .tile small{color:var(--muted);font-size:13px;line-height:1.2}
+.bgrid.paged{width:100%;flex:1;min-height:0;align-content:start}
+.bcard{cursor:pointer}
+/* the true-or-false quiz */
+.gkplay{display:flex;flex-direction:column;align-items:center;justify-content:space-between;text-align:center;gap:8px;touch-action:none;user-select:none;-webkit-user-select:none}
+.gkhint{font-family:var(--font-display);font-size:clamp(18px,4.5vw,24px);padding:10px 22px;border-radius:999px;border:2px dashed currentColor;flex:none}
+.gkhint.up{color:var(--good)} .gkhint.down{color:var(--no)}
+.gkq{font-family:var(--font-display);font-size:clamp(22px,min(6vw,4.2dvh),36px);line-height:1.25;max-width:24ch}
+.gkmoon{position:relative;width:min(44vw,22dvh);aspect-ratio:1;border-radius:50%;flex:none;background:radial-gradient(circle at 38% 34%,#FFF4C8 0%,var(--moon) 55%,#D9B24B 100%);box-shadow:0 0 50px 8px rgba(244,210,107,.18);transition:transform .35s ease,opacity .35s ease;display:grid;place-items:center;font-size:min(14vw,7dvh);color:#1B1606;font-weight:800}
+.gkmoon.flyup{transform:translateY(-30dvh) scale(.6);opacity:0} .gkmoon.flydown{transform:translateY(30dvh) scale(.6);opacity:0}
+.gkfb{display:flex;flex-direction:column;align-items:center;gap:8px;max-width:34ch}
+.gkfb .say{font-family:var(--font-display);font-size:30px} .gkfb .say.good{color:var(--good)} .gkfb .say.try{color:var(--try)}
+.gkfb p{font-size:clamp(17px,4.4vw,21px)}
+.gtabs{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;flex:none}
+.grownwrap{display:flex;flex-direction:column;gap:10px}
 .moonwolf .disc{position:absolute;inset:6%;border-radius:50%;background:radial-gradient(circle at 38% 34%,#FFF4C8 0%,var(--moon) 55%,#D9B24B 100%);box-shadow:0 0 60px 10px rgba(244,210,107,.18)}
 .moonwolf svg{position:absolute;left:18%;bottom:-2%;width:64%;height:auto}
 .hero h1{font-size:clamp(32px,7vw,50px)}
@@ -79,20 +136,20 @@ main{flex:1;display:flex;flex-direction:column;gap:22px}
 .chip{background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:16px;display:inline-flex;gap:6px;align-items:center}
 
 /* one word */
-.stage{display:flex;flex-direction:column;align-items:center;text-align:center;gap:18px;padding-top:1vh}
+.stage{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:clamp(8px,2dvh,18px)}
 .tag{font-size:15px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 14px;border-radius:999px;border:2px solid currentColor;color:var(--muted)}
-.bigword{font-weight:700;font-size:clamp(56px,15vw,104px);letter-spacing:.02em;line-height:1.1;padding:8px 28px;border-radius:24px;background:var(--panel);border:2px solid var(--line);max-width:100%;white-space:nowrap;overflow:hidden}
+.bigword{font-weight:700;font-size:clamp(40px,min(14vw,9dvh),96px);letter-spacing:.02em;line-height:1.1;padding:4px 24px;flex:none;border-radius:24px;background:var(--panel);border:2px solid var(--line);max-width:100%;white-space:nowrap;overflow:hidden}
 .bigword.ghost{color:transparent;user-select:none}
 .typed{white-space:nowrap;overflow:hidden}
-.ask{font-family:var(--font-display);font-size:clamp(24px,5vw,34px)}
+.ask{font-family:var(--font-display);font-size:clamp(22px,min(5.5vw,4dvh),34px);flex:none}
 .hint{color:var(--muted);font-size:16px}
 .yn{display:flex;gap:40px;justify-content:center}
 .ynb{width:112px;height:112px;border-radius:50%;display:grid;place-items:center;font-size:58px;font-weight:700;line-height:1;border:4px solid}
 .ynb.no{color:var(--no);border-color:var(--no);background:var(--no-soft)}
 .ynb.yes{color:var(--good);border-color:var(--good);background:var(--good-soft)}
 .ynb:active{transform:scale(.95)}
-.dots{display:flex;flex-direction:column;align-items:center;gap:18px;padding-block:6px}
-.dot{width:84px;height:84px;border-radius:50%;transition:transform .25s ease,box-shadow .25s ease;border:4px solid rgba(255,255,255,.12)}
+.dots{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:clamp(18px,6vw,36px);padding-block:10px;flex:none}
+.dot{width:clamp(52px,min(16vw,9dvh),80px);height:clamp(52px,min(16vw,9dvh),80px);border-radius:50%;transition:transform .25s ease,box-shadow .25s ease;border:4px solid rgba(255,255,255,.12)}
 .dot.c0{background:var(--dot1)} .dot.c1{background:var(--dot2)} .dot.c2{background:var(--dot3)}
 .dot.on{transform:scale(1.4);box-shadow:0 0 0 6px rgba(255,255,255,.15),0 0 34px 6px rgba(255,255,255,.18)}
 .dot.right{box-shadow:0 0 0 7px var(--good)} .dot.wrong{box-shadow:0 0 0 7px var(--no)}
@@ -103,10 +160,10 @@ main{flex:1;display:flex;flex-direction:column;gap:22px}
 .timer{width:min(320px,80%);height:8px;border-radius:99px;background:var(--panel2);overflow:hidden}
 .timer i{display:block;height:100%;width:100%;background:var(--moon);transform-origin:left;animation:shrink var(--t,2.5s) linear forwards}
 @keyframes shrink{to{transform:scaleX(0)}}
-.typed{min-height:84px;min-width:min(420px,90%);padding:10px 18px;border-radius:18px;background:var(--panel);border:2px solid var(--line);border-bottom:4px solid var(--moon);font-weight:700;font-size:clamp(40px,10vw,64px);letter-spacing:.06em;display:flex;align-items:center;justify-content:center;overflow-wrap:anywhere}
+.typed{min-height:clamp(56px,10dvh,84px);min-width:min(420px,90%);padding:6px 18px;flex:none;border-radius:18px;background:var(--panel);border:2px solid var(--line);border-bottom:4px solid var(--moon);font-weight:700;font-size:clamp(40px,10vw,64px);letter-spacing:.06em;display:flex;align-items:center;justify-content:center;overflow-wrap:anywhere}
 .typed.right{border-color:var(--good)} .typed.wrong{border-color:var(--no)}
 .kb{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;width:100%;max-width:560px}
-.key{height:54px;border-radius:12px;background:#F5F1E6;color:#16181D;font-weight:700;font-size:26px;box-shadow:0 4px 0 #9BA5B1}
+.key{height:clamp(42px,7dvh,54px);border-radius:12px;background:#F5F1E6;color:#16181D;font-weight:700;font-size:26px;box-shadow:0 4px 0 #9BA5B1}
 .key:active{transform:translateY(2px);box-shadow:0 2px 0 #9BA5B1}
 .key.wide{grid-column:span 2;font-size:20px;background:var(--panel2);color:var(--ink);box-shadow:0 4px 0 #000;border:1px solid var(--line2)}
 .key.go{background:var(--good);color:#04140A}
@@ -115,7 +172,10 @@ main{flex:1;display:flex;flex-direction:column;gap:22px}
 .fb .say.good{color:var(--good)} .fb .say.try{color:var(--try)}
 .fb .move{font-size:19px} .fb .move b{color:var(--moon)}
 
-.cloud{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:16px 20px;padding:18px 4px;min-height:34vh}
+.cloud{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:12px 18px;padding:8px 4px;flex:1;min-height:0;align-content:center}
+.cloudpage{display:flex;flex-direction:column;align-items:center;gap:8px}
+.cloudpage .quad{--qs:min(62vw,30dvh,260px)}
+.cloudpage .cw{padding:5px 14px}
 .cw{font-weight:700;padding:8px 18px;border-radius:999px;background:var(--panel2);border:2px solid var(--line2);touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}
 .cw{-webkit-touch-callout:none}
 .cw.held{border-color:var(--moon);scale:1.08}
@@ -230,12 +290,9 @@ input[type=range]{width:min(320px,100%);accent-color:var(--moon)}
 
 <div class="app">
   <header class="top">
-    <button class="exitbtn" id="exitBtn" type="button" hidden>✕ Stop</button>
-    <div class="moons" id="moons" aria-label="This round's words"></div>
-    <button class="iconbtn" id="stopBtn" type="button" aria-label="Stop talking" hidden>■</button>
-    <button class="iconbtn" id="wordsBtn" type="button" aria-label="My words">🌙</button>
-    <button class="iconbtn" id="hearBtn" type="button" aria-label="Hear it again" hidden>🔊</button>
-    <button class="grown" id="grownBtn" type="button" aria-label="Grown-ups page. Press and hold to open."><i class="fill" id="grownFill"></i><span>Grown-ups (hold)</span></button>
+    <div class="tl"><button class="backbtn" id="backBtn" type="button" aria-label="Back">←</button></div>
+    <button class="sndbtn" id="sndBtn" type="button" aria-label="Reading aloud"><span id="sndIcon">🔊</span><small id="sndText">Read aloud</small></button>
+    <div class="tr"><button class="grown" id="grownBtn" type="button" aria-label="Grown-ups page. Press and hold to open."><i class="fill" id="grownFill"></i><span>Grown-ups (hold)</span></button></div>
   </header>
   <div class="rprog" id="rprog" hidden><span id="rtext"></span><div class="rbar"><i id="rbar"></i></div></div>
   <p class="snd" id="snd" role="status" hidden></p>
@@ -371,7 +428,7 @@ special|m|good|not like the others, extra good|✨
 idea|m|think|a thought about something you could do|🤔
 colour|m|look|red, blue and green are each one of these|🎨
 #2
-noodle|p|🍜
+noodle|p|🍝
 astronaut|p|🧑‍🚀
 dinosaur|p|🦖
 planet|p|🪐
@@ -2718,7 +2775,7 @@ function logRound(){
 function choosePlayer(id){
   stopGame(); clearTimers(); hush();
   who=id; lsSet(WHO_KEY,id); loadLocal(id); started=false; sess=null; cur=null; fails=0;
-  view='start'; render(); pullProfile(id);
+  view='hub'; render(); pullProfile(id);
 }
 function addPlayer(name){
   name=String(name||'').trim().slice(0,30); if(!name) return;
@@ -2729,7 +2786,7 @@ function addPlayer(name){
   state = (first && legacy) ? Object.assign(blank(), legacy) : blank();
   if(first && legacy){ legacy=null; try{ localStorage.removeItem(STORE); }catch(e){} }
   started=false; sess=null; cur=null;
-  save(); view='start'; render();
+  save(); view='hub'; render();
 }
 function removePlayer(id){
   players=players.filter(p=>p.id!==id); lsSet(NAMES_KEY,players);
@@ -3330,11 +3387,11 @@ function mergePack(id, data){
 PACKS.forEach(p=>{ const d=lsGet(packKey(p.id),null); if(d) mergePack(p.id,d); });
 async function loadPacksRemote(){
   if(!db) return;
-  try{ const qs=await timeout(db.collection('batches').get()); qs.docs.forEach(d=>{ const v=d.data&&d.data(); if(v&&v.id) mergePack(v.id,v); }); if(appReady&&view==='badges') render(); }catch(e){}
+  try{ const qs=await timeout(db.collection('batches').get()); qs.docs.forEach(d=>{ const v=d.data&&d.data(); if(v&&v.id) mergePack(v.id,v); }); if(appReady&&(view==='badges'||view==='packs')) render(); }catch(e){}
 }
 function savePack(id){ const d=PACKDATA[id]; if(!d) return; lsSet(packKey(id), d); if(db) db.doc('batches/'+id).set(JSON.parse(JSON.stringify(d))).catch(()=>{}); }
 const sampleReady = hasClaude ? window.claude.use('sample').catch(()=>null) : Promise.resolve(null);
-let canSample=null; sampleReady.then(s=>{ canSample=!!s; if(appReady && view==='badges') render(); });
+let canSample=null; sampleReady.then(s=>{ canSample=!!s; if(appReady && (view==='badges'||view==='packs')) render(); });
 let gen=null; /* {id, count, msg, cancel} while Claude is writing a pack */
 function packPrompt(pack, exclude){
   return `You are writing word entries for a vocabulary game for an 8-year-old in New Zealand. Use New Zealand English spelling.
@@ -3357,7 +3414,7 @@ async function makePack(pack){
   if(!sample){ toast('Making word packs needs Claude: open this page on claude.ai in Chrome or Edge, signed in.'); return false; }
   if(gen) return false;
   gen={id:pack.id, count:(PACKDATA[pack.id]||{words:[]}).words.length, msg:'Claude is writing your words…', cancel:false};
-  if(view==='badges') render();
+  if((view==='badges'||view==='packs')) render();
   const data=PACKDATA[pack.id]||(PACKDATA[pack.id]={id:pack.id,words:[]});
   let empty=0;
   while(data.words.length<PACK_SIZE && !gen.cancel){
@@ -3380,32 +3437,38 @@ async function makePack(pack){
     if(!fresh.length){ if(++empty>=3){ gen.msg='Claude couldn’t find more new words for this pack.'; break; } continue; }
     data.words=data.words.concat(fresh).slice(0,PACK_SIZE+20);
     addPackWords(pack, fresh); savePack(pack.id);
-    gen.count=data.words.length; if(view==='badges') render();
+    gen.count=data.words.length; if((view==='badges'||view==='packs')) render();
   }
   data.done = data.words.length>=PACK_SIZE; savePack(pack.id);
   const ok=data.done, msg=gen.msg; gen=null;
-  if(ok){ unlockPack(pack); } else { toast(msg); if(view==='badges') render(); }
+  if(ok){ unlockPack(pack); } else { toast(msg); if((view==='badges'||view==='packs')) render(); }
   return ok;
 }
 function unlockPack(pack){
   state.packs=Array.from(new Set((state.packs||[]).concat(pack.id))); save();
   toast(`${pack.emoji} ${pack.name} unlocked: ${(PACKDATA[pack.id]||{words:[]}).words.length} new words!`,'full');
-  if(view==='badges') render();
+  if((view==='badges'||view==='packs')) render();
 }
 const packsUnlocked=()=>(state.packs||[]).length;
 const packFreeAt=()=>50*(packsUnlocked()+1);
-function packsHTML(){
+function renderPacks(){
+  const cards=packCards(), cols=window.innerWidth>=560?3:2;
+  stage.innerHTML=`<section class="listpage"><p class="hint" style="text-align:center;flex:none">📦 500 more words each. One opens free every 50 full moons (next at ${packFreeAt()}).</p>
+    ${gen?`<div class="panel" style="flex:none"><b>${esc((PACKS.find(p=>p.id===gen.id)||{}).name||'')}</b><p>${esc(gen.msg)} ${gen.count} / ${PACK_SIZE}</p><div class="bar"><i style="width:${Math.round(100*gen.count/PACK_SIZE)}%"></i></div><button class="small" type="button" id="genStop">Stop for now</button></div>`:''}
+    <div class="bgrid paged" id="bg" style="grid-template-columns:repeat(${cols},minmax(0,1fr))"></div><div id="pg"></div></section>`;
+  const per=cols*fitRows(150, gen?190:100);
+  $('#pg').outerHTML=pagerHTML(cards.length, per)||'<div></div>';
+  $('#bg').innerHTML=cards.slice(pageAt*per,(pageAt+1)*per).join('');
+  wirePager(); wirePacks();
+}
+function packCards(){
   const full=pileCounts()[3];
-  return `<h3 style="margin-top:8px">📦 Word packs</h3>
-    <p class="hint">Unlock 500 more words at a time. A pack opens free every ${50} full moons (next at ${packFreeAt()}; you have ${full}). A grown-up can also hold the button to unlock early.</p>
-    ${STANDALONE?'<p class="hint">More packs are on the way.</p>':`<p class="hint">${canSample===null?'Checking whether Claude can write new packs here…':canSample?'✅ Claude can write new packs on this device (a few minutes each, the first time).':'⚠️ Claude can’t write new packs on this device. Packs already made still unlock. To make new ones, open this page on claude.ai in Chrome or Edge on a computer, signed in.'}</p>`}
-    ${gen?`<div class="panel"><b>${esc((PACKS.find(p=>p.id===gen.id)||{}).name||'')}</b><p>${esc(gen.msg)} ${gen.count} / ${PACK_SIZE}</p><div class="bar"><i style="width:${Math.round(100*gen.count/PACK_SIZE)}%"></i></div><button class="small" type="button" id="genStop">Stop for now</button></div>`:''}
-    <div class="bgrid">${PACKS.map(p=>{
+  return PACKS.map(p=>{
       const on=packActive(p.id), d=PACKDATA[p.id], blocked=p.after && !packActive(p.after);
       if(STANDALONE && !on && !(d && d.words.length>=PACK_SIZE)) return `<div class="bcard"><div class="bhead"><span class="bemoji">${p.emoji}</span><b>${esc(p.name)}</b></div><small>🌱 Coming soon</small></div>`;
       const status= on?`✅ Unlocked · ${d?d.words.length:0} words` : blocked?`🔒 Unlock “${esc((PACKS.find(x=>x.id===p.after)||{}).name)}” first` : full>=packFreeAt()?'Ready to unlock!':`🔒 ${full} / ${packFreeAt()} full moons`;
       return `<div class="bcard${on?' got':''}"><div class="bhead"><span class="bemoji">${p.emoji}</span><b>${esc(p.name)}</b></div><small>${status}</small>
-        ${!on && !blocked ? (full>=packFreeAt()?`<button class="big" type="button" data-unlock="${p.id}">Unlock</button>`:`<button class="small holdbtn" type="button" data-hold="${p.id}"><i class="fill"></i><span>Grown-up: hold to unlock</span></button>`):''}</div>`; }).join('')}</div>`;
+        ${!on && !blocked ? (full>=packFreeAt()?`<button class="big" type="button" data-unlock="${p.id}">Unlock</button>`:`<button class="small holdbtn" type="button" data-hold="${p.id}"><i class="fill"></i><span>Grown-up: hold to unlock</span></button>`):''}</div>`; });
 }
 function startUnlock(id){
   const p=PACKS.find(x=>x.id===id); if(!p||gen) return;
@@ -3435,6 +3498,8 @@ const spellReady=()=>Object.keys(state.words).filter(w=>BY[w] && state.words[w].
 function nextWord(){
   const inRound=new Set(sess.list);
   if(sess.mode==='spell'){
+    const d=reviewDue().find(x=>x.kind==='spell' && !inRound.has(x.w));
+    if(d){ sess.reviewWord=d.w; sess.reviewKind='spell'; return d.w; }
     const c=spellReady().filter(w=>!inRound.has(w)).sort((a,b)=>state.words[a].last-state.words[b].last);
     return c[0]||null;
   }
@@ -3453,22 +3518,29 @@ const STREAMS={easy:[0], tricky:[1], every:[2], wow:[3]};
 const MIX=['every','wow','tricky','wow','every','wow','easy'];
 
 /* =================== One word ===================
-   Steps: readcheck -> (✓) readtest -> know -> (✓) knowcheck -> (she read it and knows it) spell.
-   ✗ on reading skips the test. ✗ on "know" explains it and moves on. No spelling until she reads it and knows it.
-   After a right answer she chooses "I'm sure" (it moves up) or "Test me again" (it stays to practise).
+   Every step shows the same four answers, a circle cut into quarters: ✗ No, ≈ Sort of, ✓ Yes, 🌕 Full moon.
+   🌕 always banks the whole word as a full moon (never checked again) and moves on.
+   Reading: ✗ = Luna reads it to her. ≈ or ✓ = the read test page: three coloured dots (Luna says three look-alike words)
+     and a half circle (✓ / 🌕). Picking a dot = she wasn't sure: right means a check-up later, wrong means not yet.
+     ✓ there = she can read it, trusted, never tested again.
+   Meaning: ✗ = Luna explains it (comes back later). ≈ = Luna explains it, a check-up later. ✓ = trusted.
+   Spelling: ✗ = Luna shows it and spells it out (comes back later). ≈ = look, cover, type; right = full moon with a
+     check-up later. ✓ = trusted full moon.
    A word she queued herself goes through every step again, and her answers replace the old ones. */
-let view='start', cur=null, afterGrown=null, timers=[];
+let view='hub', cur=null, afterGrown=null, timers=[];
 function clearTimers(){ timers.forEach(clearTimeout); timers=[]; }
 function later(fn,ms){ timers.push(setTimeout(fn,ms)); }
 
 function startWord(w, prefix){
   const r=rec(w); r.seen++; r.last=Date.now();
-  sess.since=(sess.since||0)+1;
   const full=(state.queue||[]).includes(w);
   state.queue=(state.queue||[]).filter(x=>x!==w);
   sess.list.push(w); countWord(); save();
-  cur={w, e:BY[w], prefix:prefix||null, full, review: sess.reviewWord===w};
-  if(cur.review){ sess.reviewWord=null; if(sess.reviewKind==='mean'){ cur.review=false; cur.mreview=true; cur.mi=0; return goStep('know'); } return goStep('spell'); }
+  cur={w, e:BY[w], prefix:prefix||null, full};
+  if(sess.reviewWord===w){ const k=sess.reviewKind; sess.reviewWord=null;
+    if(k==='mean'){ cur.mreview=true; return goStep('know'); }
+    if(k==='read'){ cur.rreview=true; return goStep('readcheck'); }
+    cur.review=true; return goStep('spell'); }
   if(sess.mode==='spell') return goStep('spell');
   if(full || !r.read) return goStep('readcheck');
   if(!r.know) return goStep('know');
@@ -3476,7 +3548,7 @@ function startWord(w, prefix){
   nextOne();
 }
 /* After the reading part: ask about meaning if still needed, spell if she can read it and knows it, else next word. */
-function afterRead(){ goStep('know'); }
+function afterRead(){ if(cur.rreview) return nextOne(); const r=rec(cur.w); if(r.know && !cur.full) return afterKnow(); goStep('know'); }
 function afterKnow(){
   const r=rec(cur.w);
   if(r.read && r.know && (cur.full || !r.spell)) return goStep('spell');
@@ -3486,22 +3558,22 @@ function afterKnow(){
 function sayStep(items, opts){ const p=(cur&&cur.prefix)||[]; if(cur) cur.prefix=null; return say(p.concat(items), opts); }
 function goStep(step){
   clearTimers(); hush();
-  cur.step=step; cur.answered=false; cur.spellPhase=null; cur.spellResult=null; cur.typed=''; view='word'; render();
+  cur.step=step; cur.answered=false; cur.spellPhase=step==='spell'?'ask':null; cur.spellResult=null; cur.typed=''; view='word'; render();
   const w=cur.w;
   if(step==='readcheck') sayStep(['Can you read this word?']);
   if(step==='readtest') sayOptions();
+  if(step==='heard') Promise.race([sayStep([`This word says ${w}.`],{need:true}),wait(3500)]).then(()=>wait(500)).then(()=>{ if(view==='word' && cur && cur.w===w && cur.step==='heard') afterRead(); });
   if(step==='know') sayStep([cur.mreview?`Do you remember what ${w} means?`:`Do you know what ${w} means?`]);
-  if(step==='knowcheck'){ const i=cur.mi||0; if(i>=nMeanings(cur.e)) say(alikeLines(cur.e).concat([{pause:500},'Do you know the difference?'])); else say(meaningLines(cur.e,i).concat([{pause:500}, i?'Did you know that one too?':'Is that what you thought?'])); }
   if(step==='explain') say(explainLines(cur.e));
+  if(step==='spell') sayStep([cur.review?`Check-up! Can you still spell ${w}?`:`Can you spell ${w}?`]);
 }
 function nextOne(counted){
   clearTimers(); hush();
+  if(!sess) return;
   if(counted!==false) sess.done++;
   if(sess.done>=sess.limit){ finishRound(); return; }
   if(sess.mode==='cloud'){ const ws=cloudWords(10); if(ws.length<3){ finishRound(); return; } return startCloud(ws); }
-  if(sess.mode==='main' && sess.phraseDue){ sess.phraseDue=false; const P=nextPhrase(); if(P) return startPhrase(P,'flow'); }
-  if(sess.mode==='main' && sess.lessonDue){ sess.lessonDue=false; const L=nextLesson(); if(L) return startLesson(L,'flow'); }
-  if(sess.mode==='main' && (sess.since||0)>=2){ const ws=cloudWords(); if(ws.length>=4){ sess.since=0; return startCloud(ws); } }
+  if(sess.mode==='say'){ const P=nextPhrase(); if(!P){ finishRound(); return; } return startPhrase(P); }
   const w=nextWord();
   if(!w){ finishRound(); return; }
   startWord(w);
@@ -3520,22 +3592,21 @@ function cloudWords(size){
   out.forEach(w=>shown.add(w));
   return shuffle(out);
 }
-const ZONES=[{p:0,n:'Not yet',s:'leave it for now'},{p:2,n:'I can read it',s:'and I know what it means'},{p:3,n:'Read and spell',s:'I can do it all'}];
+/* Cloud answers, the same four as everywhere: ✗ not yet, ≈ sort of (it goes in her queue, so Play tests it next),
+   ✓ reads it and knows it (half moon), 🌕 full moon. */
 function startCloud(ws){
   clearTimers(); hush();
-  cur={cloud:ws, placed:{}, sel:null, look:ws.map(()=>({size:22+Math.floor(Math.random()*13), tilt:(Math.random()*8-4).toFixed(1)}))};
+  cur={cloud:ws, placed:{}, sel:null, look:ws.map(()=>({size:19+Math.floor(Math.random()*8), tilt:(Math.random()*8-4).toFixed(1)}))};
   view='cloud'; render();
-  say([sess&&sess.mode==='cloud'&&sess.done===0?'Word clouds! Put each word in the right moon.':'Word cloud! Put each word in the right moon.'],{noRemember:true});
+  say([sess&&sess.done===0?'Word clouds! Drag each word to the right answer.':'Next cloud!'],{noRemember:true});
 }
 function renderCloud(){
   const left=cur.cloud.filter(w=>!(w in cur.placed));
-  stage.innerHTML=`<section class="stage" style="gap:10px"><span class="tag">☁️ Word cloud</span>
-      <p class="hint">Drag each word to a moon, or tap a word and then tap a moon. Hold a word to hear it and see what it means.</p></section>
+  stage.innerHTML=`<section class="cloudpage">
     <div class="cloud">${cur.cloud.map((w,i)=>(w in cur.placed)?'':`<button class="cw${cur.sel===w?' sel':''}" type="button" data-cw="${esc(w)}" style="font-size:${cur.look[i].size}px;transform:rotate(${cur.look[i].tilt}deg)">${esc(w)}</button>`).join('')}
       ${left.length?'':'<p class="pop" style="font-family:var(--font-display);font-size:28px;color:var(--good)">All sorted!</p>'}</div>
-    <div class="zones">${ZONES.map((z,i)=>{ const got=cur.cloud.filter(w=>cur.placed[w]===i); return `<button class="zone" type="button" data-zone="${i}"><b>${PILES[z.p].m}</b><span>${z.n}</span><small>${z.s}</small>${got.length?`<span class="got">${got.map(esc).join(', ')}</span>`:''}</button>`; }).join('')}</div>
-    <div class="row center"><button class="soft" type="button" id="cloudDone">${left.length?'Done for now ➜':'Next ➜'}</button></div>
-    <div class="wpop" id="cpop" hidden></div>`;
+    ${quadHTML(false,'cz')}
+    <div class="wpop" id="cpop" hidden></div></section>`;
   wireCloud();
 }
 function openCloudPop(w){
@@ -3551,8 +3622,8 @@ function openCloudPop(w){
   const close=()=>{ p.hidden=true; p.innerHTML=''; hush(); };
   $('#cClose').onclick=close; p.onclick=ev=>{ if(ev.target===p) close(); };
 }
-function zoneAt(x,y){ const el=document.elementFromPoint(x,y); return el&&el.closest?el.closest('.zone'):null; }
-function hotZone(z){ stage.querySelectorAll('.zone').forEach(el=>el.classList.toggle('hot',el===z)); }
+function zoneAt(x,y){ const el=document.elementFromPoint(x,y); return el&&el.closest?el.closest('.cz'):null; }
+function hotZone(z){ stage.querySelectorAll('.cz').forEach(el=>el.classList.toggle('hot',el===z)); }
 function wireCloud(){
   stage.querySelectorAll('.cw').forEach(el=>{
     el.addEventListener('pointerdown',ev=>{
@@ -3577,18 +3648,18 @@ function wireCloud(){
     el.addEventListener('click',e=>{ if(e.detail===0){ cur.sel = cur.sel===el.dataset.cw ? null : el.dataset.cw; renderCloud(); } });
     el.addEventListener('contextmenu',e=>e.preventDefault());
   });
-  stage.querySelectorAll('.zone').forEach(z=>z.onclick=()=>{ if(cur.sel) dropWord(cur.sel,+z.dataset.zone); });
-  $('#cloudDone').onclick=()=>nextOne(sess.mode==='cloud');
+  stage.querySelectorAll('.cz').forEach(z=>z.onclick=()=>{ if(cur.sel) dropWord(cur.sel,+z.dataset.zone); });
 }
 function dropWord(w, zi){
   if(!cur || !cur.cloud || (w in cur.placed)) return;
   const r=rec(w); r.seen++; r.last=Date.now(); r.cloud=(r.cloud||0)+1; countWord();
-  if(zi===1){ r.read=1; r.know=1; }
-  if(zi===2){ r.read=1; r.know=1; r.spell=1; }
+  if(zi===1){ const q=state.queue||(state.queue=[]); if(!q.includes(w)) q.push(w); }
+  if(zi===2){ r.read=1; r.know=1; }
+  if(zi===3){ r.read=1; r.know=1; r.spell=1; r.spellTested=0; }
   cur.placed[w]=zi; cur.sel=null; save();
-  chime(zi===2?'full':zi===1?'good':'try');
+  chime(zi===3?'full':zi>=1?'good':'try');
   renderCloud();
-  if(cur.cloud.every(x=>x in cur.placed)){ say(['All sorted!'],{noRemember:true}); later(()=>{ if(view==='cloud') nextOne(sess.mode==='cloud'); },1600); }
+  if(cur.cloud.every(x=>x in cur.placed)){ say(['All sorted!'],{noRemember:true}); later(()=>{ if(view==='cloud') nextOne(); },1400); }
 }
 
 
@@ -3655,122 +3726,123 @@ function wireMore(e){
   const b=$('#moreBtn'); if(!b) return;
   b.onclick=()=>{ const d=$('#deep'); d.textContent=e.deep; d.hidden=false; b.hidden=true; say([e.deep],{noRemember:true,need:true}); try{ d.scrollIntoView({block:'nearest',behavior:'smooth'}); }catch(err){} };
 }
-/* "I'm sure" / "Test me again" buttons */
-const threeHTML=(a,b,c)=>`<div class="row center sureRow"><button class="sure" type="button" id="sure">${a}</button><button class="again" type="button" id="remember">${b}</button><button class="nope" type="button" id="again">${c}</button></div>`;
-const sureHTML=(sureText, againText)=>`<div class="row center sureRow"><button class="sure" type="button" id="sure">${sureText||'I’m sure ✓'}</button><button class="again" type="button" id="again">${againText||'Test me again ↻'}</button></div>`;
+/* The four answers, as a circle cut into quarters (top: ✗ ≈, bottom: ✓ 🌕). The half circle is only the bottom two. */
+const QOPTS=[{k:'no',i:'✗',t:'No'},{k:'sort',i:'≈',t:'Sort of'},{k:'yes',i:'✓',t:'Yes'},{k:'full',i:moon(3),t:'Full moon'}];
+function quadHTML(half, cls){
+  const list=half?QOPTS.slice(2):QOPTS;
+  return `<div class="quad${half?' half':''}">${list.map((o,i)=>`<button class="q q-${o.k}${cls?' '+cls:''}" type="button" ${cls?`data-zone="${QOPTS.indexOf(o)}"`:`data-q="${o.k}"`} aria-label="${o.t}"><span class="qi">${o.i}</span><small>${o.t}</small></button>`).join('')}</div>`;
+}
+const nextHTML=`<button class="nextbtn" type="button" id="nextBtn" aria-label="Next">➜</button>`;
 
 function renderWord(){
   const w=cur.w, e=cur.e, s=cur.step;
   let html='';
-  const allBtn=(s==='readcheck'||s==='know') ? `<button class="knowall" type="button" id="knowall">⭐ I know it all</button>` : '';
   if(s==='readcheck'){
-    html=`<span class="tag">👀 Can you read it?</span><div class="bigword">${esc(w)}</div>
-      <div class="yn"><button class="ynb no" type="button" id="no" aria-label="No, I can't read it">✗</button><button class="ynb yes" type="button" id="yes" aria-label="Yes, I can read it">✓</button></div>`;
+    html=`<p class="ask">${cur.rreview?'Check-up: can you read it?':'Can you read it?'}</p><div class="bigword">${esc(w)}</div>${quadHTML()}`;
   } else if(s==='readtest'){
-    html=`<div class="bigword">${esc(w)}</div><p class="ask">Which one is it?</p>
+    html=`<p class="ask">Which one is it?</p><button class="bigword" type="button" id="bw" aria-label="Hear the three words again">${esc(w)}</button>
       <div class="dots">${cur.opts.map((o,i)=>`<button class="dot c${i}" type="button" data-dot="${i}" aria-label="Choice ${i+1}"></button>`).join('')}</div>
-      <p class="hint" id="dotHint">Listen, then tap the dot for the word you read.</p>
-      <button class="small" type="button" id="skipRead">Skip, I can read it ➜</button>`;
+      ${quadHTML(true)}`;
+  } else if(s==='heard'){
+    html=`<p class="ask">Listen…</p><button class="bigword" type="button" id="bw" aria-label="Hear it again">${esc(w)}</button><p class="move" style="font-size:22px">This word says <b style="color:var(--moon)">${esc(w)}</b>.</p>${nextHTML}`;
   } else if(s==='know'){
-    html=`<span class="tag">${cur.mreview?'🔁 Check-up: do you remember what it means?':'💡 Do you know what it means?'}</span><div class="bigword">${esc(w)}</div>
-      <div class="yn"><button class="ynb no" type="button" id="no" aria-label="No, I don't know what it means">✗</button><button class="ynb yes" type="button" id="yes" aria-label="Yes, I know what it means">✓</button></div>
-      <button class="small" type="button" id="skipKnow">Skip, I know it ➜</button>`;
-  } else if(s==='knowcheck'){
-    const i=cur.mi||0, n=nMeanings(e);
-    if(i>=n){ /* the sound-alike step */
-      html=`<span class="tag">\u26A0\uFE0F Sounds the same</span><div class="bigword">${esc(w)}</div><div class="explain pop">${alikeHTML(e)}</div>
-        ${threeHTML('I know the difference ✓','Still learning it 🔁','Not yet ✗')}`;
-    } else {
-      html=`<span class="tag">💡 ${i?`Meaning ${i+1} of ${n}: did you know this one too?`:'Is that what you thought?'}</span><div class="bigword">${esc(w)}</div><div class="explain pop">${meaningHTML(e,i)}</div>
-        ${i?threeHTML('Yes, I knew that too ✓','Still remembering 🔁','I didn\u2019t know that ✗'):threeHTML(cur.mreview?'I remembered ✓':'Yes, I knew it ✓','Still remembering 🔁','I didn\u2019t know that ✗')}${moreBtn(e)}`;
-    }
+    html=`<p class="ask">${cur.mreview?'Check-up: do you remember what it means?':'Do you know what it means?'}</p><button class="bigword" type="button" id="bw" aria-label="Hear it">${esc(w)}</button>${quadHTML()}`;
   } else if(s==='explain'){
-    html=`<div class="bigword">${esc(w)}</div><div class="explain pop">${explainHTML(e)}</div>${moreBtn(e)}
-      <button class="big" type="button" id="nextBtn">Next word ➜</button>`;
+    html=`<button class="bigword" type="button" id="bw" aria-label="Hear it">${esc(w)}</button><div class="explain pop">${explainHTML(e)}</div>${moreBtn(e)}${nextHTML}`;
   } else if(s==='spell'){
-    const phase=cur.spellPhase||'look';
-    if(phase==='look') html=`<span class="tag">${cur.review?'🔁 Check-up: spell it':'✏️ Spell it'}</span><p class="ask">Look carefully…</p><div class="bigword">${esc(w)}</div><div class="timer"><i style="--t:2.5s"></i></div>`;
-    else if(phase==='gone') html=`<span class="tag">✏️ Spell it</span><p class="ask">Picture it in your head…</p><div class="bigword ghost" aria-hidden="true">${esc(w)}</div>`;
+    const phase=cur.spellPhase||'ask';
+    if(phase==='ask') html=`<p class="ask">${cur.review?'Check-up: can you still spell it?':'Can you spell it?'}</p><button class="bigword" type="button" id="bw" aria-label="Hear it">${esc(w)}</button>${quadHTML()}`;
+    else if(phase==='show') html=`<p class="ask">Look carefully</p><div class="bigword">${esc(w)}</div><p class="spelt">${esc(w.split('').join(' · '))}</p>${nextHTML}`;
+    else if(phase==='look') html=`<p class="ask">Look carefully…</p><div class="bigword">${esc(w)}</div><div class="timer"><i style="--t:2.5s"></i></div>`;
+    else if(phase==='gone') html=`<p class="ask">Picture it in your head…</p><div class="bigword ghost" aria-hidden="true">${esc(w)}</div>`;
     else {
       const typed=cur.typed||'';
       const keys='abcdefghijklmnopqrstuvwxyz'.split('');
-      html=`<span class="tag">✏️ Spell it</span><div class="typed${cur.spellResult==='right'?' right':cur.spellResult==='wrong'?' wrong':''}" id="typed">${esc(typed)||'&nbsp;'}</div>`
+      html=`<div class="typed${cur.spellResult==='right'?' right':cur.spellResult==='wrong'?' wrong':''}" id="typed">${esc(typed)||'&nbsp;'}</div>`
         +(cur.spellResult?'':`<div class="kb" id="kb">${keys.map(k=>`<button class="key" type="button" data-k="${k}">${k}</button>`).join('')}
-          <button class="key wide" type="button" id="bk" aria-label="Rub out">⌫</button><button class="key wide go" type="button" id="check">✓ Done</button></div>`);
+          <button class="key wide" type="button" id="bk" aria-label="Rub out">⌫</button><button class="key wide" type="button" id="hearW" aria-label="Hear the word">🔊</button><button class="key wide go" type="button" id="check">✓ Done</button></div>`);
     }
-    if(!cur.spellResult) html+=`<div class="row center"><button class="small" type="button" id="skip">Skip spelling for now ➜</button></div>`;
   }
-  stage.innerHTML=`<section class="stage">${allBtn}${html}<div class="fb" id="fb"></div></section>`;
+  stage.innerHTML=`<section class="stage">${html}<div class="fb" id="fb"></div></section>`;
   wireWord();
 }
 function wireWord(){
   const s=cur.step, w=cur.w;
-  const y=$('#yes'), n=$('#no');
-  const ka=$('#knowall'); if(ka) ka.onclick=()=>knowAll();
-  if(s==='readcheck'){
-    y.onclick=()=>{ cur.opts=readOptions(w); goStep('readtest'); };
-    n.onclick=()=>{ const r=rec(w); if(cur.full){ r.read=0; save(); }
-      goStep('know'); };
-  }
-  if(s==='know'){
-    y.onclick=()=>{ cur.mi=0; cur.stillRem=false; goStep('knowcheck'); };
-    $('#skipKnow').onclick=()=>{ const r=rec(w); r.know=1; r.mdue=null; r.mbox=null; save(); moonsBar(); chime('good'); afterKnow(); };
-    n.onclick=()=>{ const r=rec(w); r.know=0; save(); moonsBar(); goStep('explain'); };
-  }
-  if(s==='knowcheck'){
-    const nextCheck=()=>{ const i=cur.mi||0;
-      if(i+1<nChecks(cur.e)){ cur.mi=i+1; chime('good'); goStep('knowcheck'); return; }
-      const r=rec(w); r.know=1;
-      if(cur.stillRem){ if(cur.mreview) passMeaning(r); else { r.mbox=0; r.mdue=Date.now()+REVIEW[0]; } }
-      else { r.mdue=null; r.mbox=null; }   /* she knew it: trusted, no check-up */
-      save(); moonsBar(); chime('good');
-      if(cur.mreview){ feedback('good', cur.stillRem?'OK, we\u2019ll check again later':'Banked for good!'); later(()=>nextOne(),1300); return; }
-      afterKnow(); };
-    $('#sure').onclick=nextCheck;
-    $('#remember').onclick=()=>{ cur.stillRem=true; nextCheck(); };
-    $('#again').onclick=()=>{ const r=rec(w); r.know=0; r.mdue=null; r.mbox=null; r.knowAgain=(r.knowAgain||0)+1; save(); moonsBar(); say(['OK, I’ll ask you again later.'],{noRemember:true}); later(()=>nextOne(),1400); };
-  }
-  if(s==='explain'){ $('#nextBtn').onclick=()=>nextOne(); }
-  if(s==='knowcheck'||s==='explain') wireMore(cur.e);
+  stage.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>onQuad(b.dataset.q));
   stage.querySelectorAll('[data-dot]').forEach(b=>b.onclick=()=>answerRead(+b.dataset.dot));
-  const sr=$('#skipRead'); if(sr) sr.onclick=()=>{ if(cur.answered) return; cur.answered=true; const r=rec(w); r.read=1; save(); moonsBar(); chime('good'); afterRead(); };
+  const bw=$('#bw'); if(bw) bw.onclick=()=>{ if(s==='readtest'){ if(!cur.answered) sayOptions(); } else say([w],{noRemember:true,need:true}); };
+  const nb=$('#nextBtn'); if(nb) nb.onclick=()=>{
+    if(s==='heard') return afterRead();
+    if(s==='explain') return cur.explainKind==='sort' ? afterKnow() : nextOne();
+    nextOne(); };
+  if(s==='explain') wireMore(cur.e);
   if(s==='spell'){
-    if(!cur.spellPhase){ cur.spellPhase='look'; sayStep(['Look carefully. Then spell it.']);
-      later(()=>{ cur.spellPhase='gone'; renderWord(); },2500);
-      later(()=>{ cur.spellPhase='type'; cur.typed=''; renderWord(); say([`Now spell ${w}.`],{need:true}); },4000); }
     stage.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>typeKey(b.dataset.k));
     const bk=$('#bk'); if(bk) bk.onclick=()=>typeKey('back');
+    const hw=$('#hearW'); if(hw) hw.onclick=()=>say([w],{noRemember:true,need:true});
     const ck=$('#check'); if(ck) ck.onclick=checkSpell;
-    const ss=$('#skipSpell'); if(ss) ss.onclick=()=>{ const r=rec(w); if(cur.review) passReview(r); r.spell=1; r.spellSkipSure=(r.spellSkipSure||0)+1; save(); moonsBar(); chime('full'); clearTimers(); hush(); feedback('good','Full moon!',`<p class="move">${PILES[3].m} <b>${esc(w)}</b></p>`); later(()=>nextOne(),700); };
-    const sk=$('#skip'); if(sk) sk.onclick=()=>{ const r=rec(w); r.skips=(r.skips||0)+1; save(); nextOne(); };
   }
 }
-/* "I know it all": she can read it, knows it and can spell it. Bank it as a full moon and move straight on. */
+function onQuad(k){
+  if(!cur || cur.answered) return;
+  const s=cur.step, w=cur.w, r=rec(w);
+  if(k==='full') return knowAll();
+  if(s==='readcheck'){
+    if(k==='no'){ r.read=0; r.rdue=null; r.rbox=null; save(); return goStep('heard'); }
+    cur.selfRead=k; cur.opts=readOptions(w); return goStep('readtest');
+  }
+  if(s==='readtest' && k==='yes'){ /* she can read it: trusted, never tested again */
+    cur.answered=true; r.read=1; r.rdue=null; r.rbox=null; r.readSure=1; save(); chime('good'); hush(); return afterRead();
+  }
+  if(s==='know'){
+    if(k==='no'){ r.know=0; r.mdue=null; r.mbox=null; r.knowAgain=(r.knowAgain||0)+1; save(); cur.explainKind='no'; return goStep('explain'); }
+    if(k==='sort'){ r.know=1; if(!cur.mreview) r.mbox=0; r.mdue=Date.now()+REVIEW[Math.min(r.mbox||0,REVIEW.length-1)]; save(); cur.explainKind='sort'; return goStep('explain'); }
+    if(k==='yes'){ r.know=1; r.mdue=null; r.mbox=null; save(); chime('good'); hush();
+      if(cur.mreview){ toast(`⭐ ${w}: banked for good`); return nextOne(); }
+      return afterKnow(); }
+  }
+  if(s==='spell' && cur.spellPhase==='ask'){
+    if(k==='no'){ if(cur.review) failReview(r); else r.spell=0; save(); cur.spellPhase='show'; renderWord();
+      say([`${cap(w)} is spelled:`, {pause:300}, spellOut(w)+'.'],{noRemember:true,need:true}); return; }
+    if(k==='sort'){ cur.spellPhase='look'; renderWord(); say(['Look carefully. Then spell it.'],{noRemember:true});
+      later(()=>{ cur.spellPhase='gone'; renderWord(); },2500);
+      later(()=>{ cur.spellPhase='type'; cur.typed=''; renderWord(); say([`Now spell ${w}.`],{need:true}); },4000); return; }
+    if(k==='yes'){ cur.answered=true; r.spell=1; r.spellTested=0; r.reviewDone=1; r.due=null; r.box=null; save(); fullMoon(w); return; }
+  }
+}
+/* 🌕 "Full moon": she can read it, knows it and can spell it. Bank it for good and move straight on. */
 function knowAll(){
-  const r=rec(cur.w); r.read=1; r.know=1; r.spell=1; r.spellTested=0; r.due=null; r.mdue=null; r.knowAll=(r.knowAll||0)+1; save();
-  clearTimers(); hush(); chime('full'); moonsBar();
+  const r=rec(cur.w); r.read=1; r.know=1; r.spell=1; r.spellTested=0; r.due=null; r.mdue=null; r.rdue=null; r.reviewDone=1; r.knowAll=(r.knowAll||0)+1; save();
+  cur.answered=true; clearTimers(); hush(); chime('full');
   stage.querySelectorAll('button').forEach(b=>b.disabled=true);
   feedback('good','Full moon!',`<p class="move">${PILES[3].m} <b>${esc(cur.w)}</b></p>`);
-  later(()=>nextOne(false),450);
+  later(()=>nextOne(false),700);
 }
-function feedback(kind, text, extra){ const fb=$('#fb'); if(fb){ fb.innerHTML=`<p class="say ${kind} pop">${text}</p>${extra||''}`; try{ fb.scrollIntoView({block:'nearest',behavior:'smooth'}); }catch(e){} } }
+function fullMoon(w){
+  chime('full'); hush();
+  stage.querySelectorAll('button').forEach(b=>b.disabled=true);
+  feedback('good','Full moon!',`<p class="move">${PILES[3].m} <b>${esc(w)}</b></p>`);
+  later(()=>{ if(view==='word' && cur && cur.w===w) nextOne(); },900);
+}
+function feedback(kind, text, extra){ const fb=$('#fb'); if(fb){ fb.innerHTML=`<p class="say ${kind} pop">${text}</p>${extra||''}`; } }
 
+/* The read test: picking a dot means she wasn't sure. Right = it counts, with a check-up later. Wrong = not yet. */
+const RREVIEW=[2*864e5, 10*864e5, 70*864e5];
+function passRead(r){ r.rbox=(r.rbox||0)+1; r.rdue = r.rbox>=RREVIEW.length ? null : Date.now()+RREVIEW[r.rbox]; }
 function answerRead(i){
   if(cur.answered) return; cur.answered=true; hush();
   const ok=cur.opts[i]===cur.w, ci=cur.opts.indexOf(cur.w);
   stage.querySelectorAll('.dot').forEach((d,j)=>{ d.classList.remove('on'); d.disabled=true; if(j===ci) d.classList.add('right'); else if(j===i) d.classList.add('wrong'); else d.classList.add('fade'); });
-  const h=$('#dotHint'); if(h) h.hidden=true; const sr2=$('#skipRead'); if(sr2) sr2.hidden=true;
+  stage.querySelectorAll('[data-q]').forEach(b=>b.disabled=true);
   const w=cur.w, r=rec(w);
-  if(ok){ chime('good'); const c=pick(['Well done!','That’s right!','Yes!','Great job!','You got it!']);
-    feedback('good',c+' You read it.', sureHTML());
-    $('#sure').onclick=()=>{ r.read=1; save(); moonsBar(); afterRead(); };
-    $('#again').onclick=()=>{ r.read=0; r.readAgain=(r.readAgain||0)+1; save(); moonsBar(); afterRead(); };
-    say([c+' You read it.', {pause:400}, 'Are you sure? Or shall I test you again later?'],{noRemember:true});
+  if(ok){ r.read=1; if(cur.rreview) passRead(r); else { r.rbox=0; r.rdue=Date.now()+RREVIEW[0]; } save(); chime('good');
+    const c=pick(['Well done!','That’s right!','Yes!','Great job!','You got it!']);
+    feedback('good',c);
+    Promise.race([say([c],{noRemember:true}),wait(2000)]).then(()=>wait(300)).then(()=>{ if(view==='word' && cur && cur.w===w && cur.step==='readtest') afterRead(); });
   } else {
-    if(cur.full){ r.read=0; } save(); moonsBar();
-    chime('try'); feedback('try','Good try!',`<p class="move">It says <b>${esc(w)}</b>.</p>`);
-    const goOn=()=>{ if(view==='word' && cur && cur.w===w && cur.step==='readtest') afterRead(); };
-    Promise.race([say([`Good try. This word says ${w}.`],{noRemember:true}),wait(3000)]).then(()=>wait(400)).then(goOn);
+    r.read=0; r.rdue=null; r.rbox=null; save(); chime('try');
+    feedback('try','Good try!',`<p class="move">It says <b>${esc(w)}</b>.</p>`);
+    Promise.race([say([`Good try. This word says ${w}.`],{noRemember:true,need:true}),wait(3000)]).then(()=>wait(400)).then(()=>{ if(view==='word' && cur && cur.w===w && cur.step==='readtest') afterRead(); });
   }
 }
 function typeKey(k){
@@ -3784,195 +3856,201 @@ function checkSpell(){
   const w=cur.w, ok=cur.typed.toLowerCase()===w.toLowerCase(), r=rec(w);
   cur.spellResult=ok?'right':'wrong';
   renderWord();
-  if(ok){ chime('good');
-    r.spellStreak=(r.spellStreak||0)+1;
-    const need=cur.review?1:(r.spellMiss?2:1);
-    if(r.spellStreak<need){ save();
-      feedback('good','That\u2019s right!',`<p class="move">This word was tricky before, so spell it right once more another time to fill the moon.</p><button class="big" type="button" id="nextBtn">Next word ➜</button>`);
-      $('#nextBtn').onclick=()=>nextOne();
-      say(['That\u2019s right!', {pause:300}, 'This word was tricky before, so I\u2019ll ask you to spell it once more another time.'],{noRemember:true});
-      return; }
+  if(ok){
+    r.spell=1; r.spellStreak=(r.spellStreak||0)+1;
+    if(cur.review) passReview(r); else { r.spellTested=1; r.reviewDone=0; r.due=null; }
+    save();
     const c=pick(['Well done!','That’s right!','Great job!']);
-    feedback('good',c+' You spelled it!', sureHTML());
-    if(cur.review){
-      $('#sure').onclick=()=>{ chime('full'); feedback('good','Still a full moon!',`<p class="move">${PILES[3].m} <b>${esc(w)}</b></p><div class="row center"><button class="sure" type="button" id="bank">⭐ Bank it for good</button><button class="again" type="button" id="later2">🔁 Check me again later</button></div>`);
-        say(['Still a full moon!', {pause:300}, 'Bank it for good, or check it again later?'],{noRemember:true});
-        $('#bank').onclick=()=>{ r.reviewDone=1; r.due=null; r.lastCheck=Date.now(); save(); moonsBar(); toast(`⭐ ${w} is banked for good!`); nextOne(); };
-        $('#later2').onclick=()=>{ passReview(r); save(); moonsBar(); toast(r.due?`🔁 Next check-up for ${w}: ${shortDate(r.due)}`:`⭐ ${w} is banked for good!`); nextOne(); }; };
-      $('#again').onclick=()=>{ failReview(r); save(); moonsBar(); nextOne(); };
-      say([c+' You spelled it.', {pause:400}, 'Are you sure? Or shall I test you again later?'],{noRemember:true});
-      return;
-    }
-    $('#sure').onclick=()=>{ r.spell=1; r.spellTested=1; r.reviewDone=0; r.due=null; save(); moonsBar(); chime('full');
-      feedback('good','Full moon!',`<p class="move">${PILES[3].m} <b>${esc(w)}</b>: you read it, know it and spell it!</p>`);
-      Promise.race([say([cap(w)+' is a full moon word!'],{noRemember:true}),wait(3000)]).then(()=>wait(300)).then(()=>{ if(view==='word' && cur && cur.w===w) nextOne(); }); };
-    $('#again').onclick=()=>{ r.spell=0; r.spellAgain=(r.spellAgain||0)+1; save(); moonsBar(); nextOne(); };
-    say([c+' You spelled it.', {pause:400}, 'Are you sure? Or shall I test you again later?'],{noRemember:true});
+    chime('full'); feedback('good',c+' Full moon!',`<p class="move">${PILES[3].m} <b>${esc(w)}</b></p>`);
+    Promise.race([say([c+' '+cap(w)+' is a full moon word!'],{noRemember:true}),wait(3000)]).then(()=>wait(300)).then(()=>{ if(view==='word' && cur && cur.w===w) nextOne(); });
   } else {
     r.spellStreak=0;
-    if(cur.review) failReview(r); else r.spellMiss=(r.spellMiss||0)+1;
-    if(cur.full) r.spell=0; save(); moonsBar(); chime('try');
-    feedback('try','Good try!',`<p class="move">It’s spelled <b>${esc(w)}</b></p><button class="big" type="button" id="nextBtn">Next word ➜</button>`);
+    if(cur.review) failReview(r); else { r.spell=0; r.spellMiss=(r.spellMiss||0)+1; }
+    save(); chime('try');
+    feedback('try','Good try!',`<p class="spelt">${esc(w.split('').join(' · '))}</p>${nextHTML}`);
     $('#nextBtn').onclick=()=>nextOne();
-    say([`Good try. ${cap(w)} is spelled:`, {pause:300}, w.split('').map(c=>c.toUpperCase()).join(', ')+'.'],{noRemember:true});
+    say([`Good try. ${cap(w)} is spelled:`, {pause:300}, spellOut(w)+'.'],{noRemember:true,need:true});
   }
 }
 
 /* =================== Screens =================== */
-function moonsBar(){
-  const el=$('#moons');
-  if(view==='word' && sess) el.innerHTML=sess.list.map(w=>`<span class="${cur&&cur.w===w?'now':''}" aria-hidden="true">${PILES[phaseOf(w)].m}</span>`).join('');
-  else el.innerHTML='';
-  $('#hearBtn').hidden = view!=='word';
-  /* while a round is on: a Stop button and how far through it she is */
-  const inRound = !!sess && ['word','cloud','phrase','lesson'].includes(view) && !(view==='phrase'&&phraseFrom==='sayings') && !(view==='lesson'&&lessonFrom==='badges');
-  $('#exitBtn').hidden=!inRound; $('#rprog').hidden=!inRound;
-  if(inRound){ const n=Math.min(sess.done+1, sess.limit);
-    $('#rtext').textContent = sess.mode==='cloud' ? `Cloud ${n} of ${sess.limit}` : sess.mode==='spell' ? `Spelling ${n} of ${sess.limit}` : `Word ${n} of ${sess.limit}`;
-    $('#rbar').style.width = Math.round(100*sess.done/Math.max(1,sess.limit))+'%'; }
-  $('#wordsBtn').hidden = view==='words' || view==='grown' || view==='game' || view==='who';
+/* The header is the same on every page: ← back (left, not on the home screen), reading aloud (middle), grown-ups (right). */
+const SNDS={on:{i:'🔊',t:'Read aloud'},asked:{i:'🔈',t:'When asked'},never:{i:'🔇',t:'Never'}};
+const sndMode=()=>!state.sound?'never':state.readMode==='needed'?'asked':'on';
+function cycleSnd(){
+  const m=sndMode();
+  if(m==='on'){ state.sound=true; state.readMode='needed'; }
+  else if(m==='asked'){ hush(); state.sound=false; }
+  else { state.sound=true; state.readMode='all'; }
+  save(); header();
+  const n=sndMode(); toast(n==='on'?'🔊 Luna reads everything aloud':n==='asked'?'🔈 Luna only reads what you need, or when you tap':'🔇 Luna stays quiet');
+}
+function header(){
+  $('#backBtn').hidden = view==='hub' || (view==='who' && !who);
+  const s=SNDS[sndMode()]; $('#sndIcon').textContent=s.i; $('#sndText').textContent=s.t;
+  /* while a round is on: how far through it she is */
+  const inRound = (!!sess && ['word','cloud','phrase'].includes(view)) || (view==='gkplay' && !!gk);
+  $('#rprog').hidden=!inRound;
+  if(inRound){
+    if(view==='gkplay'){ const n=Math.min(gk.i+1,gk.list.length); $('#rtext').textContent=`Question ${n} of ${gk.list.length}`; $('#rbar').style.width=Math.round(100*gk.i/Math.max(1,gk.list.length))+'%'; }
+    else { const n=Math.min(sess.done+1, sess.limit);
+      $('#rtext').textContent = sess.mode==='cloud' ? `Cloud ${n} of ${sess.limit}` : sess.mode==='spell' ? `Spelling ${n} of ${sess.limit}` : sess.mode==='say' ? `Saying ${n} of ${sess.limit}` : `Word ${n} of ${sess.limit}`;
+      $('#rbar').style.width = Math.round(100*sess.done/Math.max(1,sess.limit))+'%'; }
+  }
+}
+const moonsBar=header;
+/* Back always goes up one page, straight away: no summaries, no "are you sure". */
+function goBack(){
+  hush(); clearTimers(); stopGame();
+  const v=view;
+  if(v==='grown') return closeGrown();
+  if(['word','cloud','phrase'].includes(v)){ if(sess) logRound(); sess=null; cur=null; view='start'; }
+  else if(v==='start' || v==='gk' || v==='who') view='hub';
+  else if(v==='words' || v==='badges' || v==='game') view='start';
+  else if(v==='pile') view='words';
+  else if(v==='packs' || v==='lesson') view='badges';
+  else if(v==='gkplay'){ gk=null; view='gk'; }
+  else view='hub';
+  pageAt=0; render();
 }
 function pileCounts(){
   const c=[0,0,0,0]; AW().forEach(e=>c[phaseOf(e.w)]++); return c;
 }
-function pilesHTML(){
-  const c=pileCounts();
-  return `<div class="piles">${PILES.map((p,i)=>`<div class="pile"><b>${p.m}</b><span class="n">${c[i]}</span><small>${p.n}</small></div>`).join('')}</div>`;
-}
 function render(){
   if(view!=='game') stopGame();
-  moonsBar();
+  if(!who && view!=='grown') view='who';
+  header();
   if(view==='who') return renderWho();
+  if(view==='hub') return renderHub();
   if(view==='start') return renderStart();
   if(view==='word') return renderWord();
-  if(view==='end') return renderEnd();
   if(view==='words') return renderWords();
+  if(view==='pile') return renderPile();
   if(view==='cloud') return renderCloud();
   if(view==='badges') return renderBadges();
+  if(view==='packs') return renderPacks();
   if(view==='lesson') return renderLesson();
   if(view==='game') return renderGame();
   if(view==='phrase') return renderPhrase();
-  if(view==='sayings') return renderSayings();
+  if(view==='gk') return renderGkMain();
+  if(view==='gkplay') return renderGkPlay();
   if(view==='grown') return renderGrown();
 }
-function queueNote(){ const n=(state.queue||[]).length; return n?` (${n} in your queue)`:''; }
-function renderStart(){
-  const full=pileCounts()[3], sp=spellReady().length;
-  stage.innerHTML=`<section class="hero">
-    <button class="small" id="sw" type="button">👤 ${esc(playerName())} · switch</button>
-    <div class="moonwolf"><div class="disc"></div><svg viewBox="0 0 120 104" aria-hidden="true"><use href="#wolf"/></svg></div>
-    <h1>Luna's Word Moon</h1>
-    <p class="sub">${full?`You have ${full} full-moon word${full===1?'':'s'}!`:'Help every word grow to a full moon.'}</p>
-    <button class="big" id="go" type="button" disabled>Loading…</button>
-    <button class="soft" id="clouds" type="button">☁️ Word clouds only</button>
-    <div class="row center">
-      <button class="soft" id="mw" type="button">🌙 My words${esc(queueNote())}</button>
-      <button class="soft" id="bd" type="button">🏅 Badges</button>
-      <button class="soft" id="sy" type="button">💬 Sayings</button>
-      <button class="soft" id="mr" type="button">🐺 Moon Run${wordsPlayed()<GAME_UNLOCK?` 🔒 ${wordsPlayed()}/${GAME_UNLOCK}`:''}</button>
-      ${sp?`<button class="soft" id="sp" type="button">✏️ Spelling practice (${sp})</button>`:''}
-      ${STANDALONE?'<a class="soft" href="../maths-moon/" style="text-decoration:none">🔢 Maths Moon</a>':''}
-    </div>
-    <button class="pill" id="readMode" type="button" aria-pressed="${state.readMode!=='needed'}">🔊 Read aloud: ${state.readMode==='needed'?'only when needed':'everything'}</button>
-    <p class="vnote">${esc(voiceNote())}</p>
+const wolfHTML=`<div class="moonwolf"><div class="disc"></div><svg viewBox="0 0 120 104" aria-hidden="true"><use href="#wolf"/></svg></div>`;
+/* Home: one button per game */
+const MATHS_URL = STANDALONE ? '../maths-moon/' : 'https://deklerkdan.github.io/maths-moon/';
+function renderHub(){
+  stage.innerHTML=`<section class="hub">
+    <button class="hubbtn" type="button" id="hWords"><span>📖</span><b>Words</b></button>
+    <a class="hubbtn" href="${MATHS_URL}" ${STANDALONE?'':'target="_blank" rel="noopener"'}><span>🔢</span><b>Maths</b></a>
+    <button class="hubbtn" type="button" id="hQuiz"><span>🌍</span><b>Quiz</b></button>
   </section>`;
-  const go=$('#go');
-  Promise.race([loaded, wait(6000)]).then(()=>{ if(view!=='start') return; go.disabled=false; go.textContent='Start ▶'; });
-  go.onclick=()=>begin('main');
-  $('#sw').onclick=()=>{ hush(); view='who'; render(); };
-  const spb=$('#sp'); if(spb) spb.onclick=()=>begin('spell');
-  $('#mw').onclick=()=>openWords('start');
-  $('#bd').onclick=()=>openBadges('start');
-  $('#mr').onclick=()=>openGame('start');
-  $('#sy').onclick=()=>openSayings('start');
-  $('#clouds').onclick=()=>begin('cloud');
-  $('#readMode').onclick=()=>{ state.readMode=state.readMode==='needed'?'all':'needed'; save(); render(); toast(state.readMode==='needed'?'🔈 Luna only reads what you need to hear (tap 🔊 for more)':'🔊 Luna reads everything aloud'); };
+  $('#hWords').onclick=()=>{ hush(); view='start'; render(); };
+  $('#hQuiz').onclick=()=>{ hush(); view='gk'; render(); };
+}
+/* The word game's main screen: Luna, then two rows of joined buttons, and nothing else. */
+function renderStart(){
+  const locked=wordsPlayed()<GAME_UNLOCK;
+  stage.innerHTML=`<section class="gmain">
+    ${wolfHTML}
+    <div class="blocks four">
+      <button class="blk main" type="button" id="bPlay"><span>▶</span><b>Play</b></button>
+      <button class="blk" type="button" id="bClouds"><span>☁️</span><b>Word clouds</b></button>
+      <button class="blk" type="button" id="bSay"><span>💬</span><b>Sayings</b></button>
+      <button class="blk" type="button" id="bSpell"><span>✏️</span><b>Spelling</b></button>
+    </div>
+    <div class="blocks three">
+      <button class="blk" type="button" id="bMoons"><span>🌙</span><b>My moons</b></button>
+      <button class="blk" type="button" id="bBadges"><span>🏅</span><b>My badges</b></button>
+      <button class="blk" type="button" id="bRun"><span>🐺</span><b>Wolf run</b>${locked?'<i>🔒</i>':''}</button>
+    </div>
+  </section>`;
+  $('#bPlay').onclick=()=>begin('main');
+  $('#bClouds').onclick=()=>begin('cloud');
+  $('#bSay').onclick=()=>begin('say');
+  $('#bSpell').onclick=()=>begin('spell');
+  $('#bMoons').onclick=()=>openWords();
+  $('#bBadges').onclick=()=>openBadges();
+  $('#bRun').onclick=()=>openGame();
 }
 function begin(mode){
-  started=true; newRound(mode);
-  if(mode==='cloud'){ sess.limit=CLOUD_ROUND; const ws=cloudWords(10); if(ws.length<3){ finishRound(); return; } return startCloud(ws); }
-  const w=nextWord(); if(!w){ finishRound(); return; }
+  started=true; newRound(mode); pageAt=0;
+  if(mode==='cloud'){ sess.limit=CLOUD_ROUND; const ws=cloudWords(10); if(ws.length<3){ sess=null; toast('No new words left for clouds.'); return; } return startCloud(ws); }
+  if(mode==='say'){ sess.limit=SAY_ROUND; const P=nextPhrase(); if(!P){ sess=null; return; } return startPhrase(P, ['Sayings!', {pause:500}]); }
+  const w=nextWord();
+  if(!w){ sess=null; toast(mode==='spell'?'✏️ No words to spell yet. Play first!':'You’ve done every word!'); return; }
   /* the greeting goes in front of the first question, said straight from this tap so phones allow sound */
   startWord(w, [mode==='spell'?'Spelling time!':'Hi! Let’s grow some words.', {pause:600}]);
 }
+/* At the end of a round, straight back to the game's main screen with a cheer. */
 function finishRound(){
-  clearTimers(); view='end'; logRound(); render();
-  say(['Done for today! Great work!'],{noRemember:true});
-}
-function renderEnd(){
-  const ups=(sess?sess.list:[]).map(w=>`<span class="chip">${PILES[phaseOf(w)].m} ${esc(w)}</span>`).join('');
-  const sp=spellReady().length;
-  stage.innerHTML=`<section class="hero">
-    <div class="moonwolf"><div class="disc"></div><svg viewBox="0 0 120 104" aria-hidden="true"><use href="#wolf"/></svg></div>
-    <h1>Done for today!</h1>
-    ${ups?`<div class="chips">${ups}</div>`:''}
-    ${pilesHTML()}
-    <div class="row center"><button class="soft" id="again" type="button">One more round</button><button class="soft" id="mw" type="button">🌙 My words</button><button class="soft" id="bd" type="button">🏅 Badges</button><button class="soft" id="mr" type="button">🐺 Moon Run</button>${sp?`<button class="soft" id="sp" type="button">✏️ Spelling practice (${sp})</button>`:''}<button class="soft" id="home" type="button">Finish</button></div>
-  </section>`;
-  $('#again').onclick=()=>begin(sess&&sess.mode==='cloud'?'cloud':'main');
-  $('#mw').onclick=()=>openWords('end');
-  $('#bd').onclick=()=>openBadges('end');
-  $('#mr').onclick=()=>openGame('end');
-  const spb=$('#sp'); if(spb) spb.onclick=()=>begin('spell');
-  $('#home').onclick=()=>{ hush(); view='start'; render(); };
+  clearTimers(); logRound(); sess=null; cur=null; view='start'; render();
+  chime('full'); toast('🌕 Round done. Well done!');
+  say(['Well done! Round done.'],{noRemember:true});
 }
 
-/* =================== My words: four columns of moons ===================
-   Left to right: full moons (reads, knows, spells) | half moons (reads + knows) | crescents (knows, or reads) | not tried yet.
-   Headings sit at the bottom; moons stack upwards, the next words nearest the heading. Tap a moon to see and hear the word. */
-let wordsFrom='start', popWord=null;
-function openWords(from){ clearTimers(); hush(); wordsFrom=from||'start'; popWord=null; view='words'; render();
-  requestAnimationFrame(()=>{ try{ window.scrollTo(0, document.body.scrollHeight); }catch(e){} }); }
-const COLS=[{p:3,n:'Yay! All three',s:'reads, knows and spells'},{p:2,n:'Knows + reads',s:''},{p:1,n:'Knows it',s:'or reads it'},{p:0,n:'Not yet',s:'still a mystery'}];
+/* =================== Pages of a list (no scrolling) =================== */
+let pageAt=0;
+function pagerHTML(n, per){
+  const pages=Math.max(1,Math.ceil(n/per)); pageAt=Math.min(Math.max(0,pageAt),pages-1);
+  return pages>1 ? `<div class="pager"><button type="button" id="pgPrev" aria-label="Back a page" ${pageAt?'':'disabled'}>‹</button><span>${pageAt+1} / ${pages}</span><button type="button" id="pgNext" aria-label="Next page" ${pageAt<pages-1?'':'disabled'}>›</button></div>` : '';
+}
+function wirePager(){ const p=$('#pgPrev'), n=$('#pgNext'); if(p) p.onclick=()=>{ pageAt--; render(); }; if(n) n.onclick=()=>{ pageAt++; render(); }; }
+/* how many rows of a given height fit below the header (and a title and pager) */
+function fitRows(rowH, used){ const h=(stage.clientHeight||window.innerHeight-120)-(used||0); return Math.max(2, Math.floor(h/rowH)); }
+
+/* =================== My moons ===================
+   Four piles (full moon, half, crescent, not yet) and her queue. Tap one to see its words, a page at a time.
+   Tap a word to hear it, see what it means, queue it, or move it up a moon. */
+let pileOpen=3, popWord=null;
+function openWords(){ clearTimers(); hush(); popWord=null; pageAt=0; view='words'; render(); }
+const COLS=[{p:3,n:'Full moon',s:'reads, knows and spells'},{p:2,n:'Half moon',s:'reads and knows'},{p:1,n:'Crescent',s:'knows it or reads it'},{p:0,n:'Not yet',s:'still a mystery'}];
+function pileWords(p){ if(p==='q') return (state.queue||[]).filter(w=>BY[w]); return AW().filter(e=>phaseOf(e.w)===p).map(e=>e.w); }
 function renderWords(){
+  const q=pileWords('q');
+  stage.innerHTML=`<section class="gmain">
+    <div class="tiles">${COLS.map(c=>`<button class="tile" type="button" data-pile="${c.p}"><b>${PILES[c.p].m}</b><span class="n">${pileWords(c.p).length}</span><small>${c.n}</small></button>`).join('')}</div>
+    ${q.length?`<button class="soft" type="button" data-pile="q">⏭ My queue (${q.length})</button>`:''}
+  </section>`;
+  stage.querySelectorAll('[data-pile]').forEach(b=>b.onclick=()=>{ pileOpen=b.dataset.pile==='q'?'q':+b.dataset.pile; pageAt=0; view='pile'; render(); });
+}
+function renderPile(){
+  const list=pileWords(pileOpen), c=COLS.find(x=>x.p===pileOpen);
+  const cols=window.innerWidth>=560?4:3;
+  stage.innerHTML=`<section class="listpage"><div class="ptitle">${pileOpen==='q'?'⏭ My queue':PILES[pileOpen].m+' '+esc(c.n)} <small style="color:var(--muted);font-size:16px">${list.length}</small></div><div class="wgrid" id="wg" style="grid-template-columns:repeat(${cols},minmax(0,1fr))"></div><div id="pg"></div><div class="wpop" id="pop" hidden></div></section>`;
+  const per=cols*fitRows(46,130);
+  $('#pg').outerHTML=pagerHTML(list.length, per)||'<div></div>';
   const q=new Set(state.queue||[]);
-  const byPhase={0:[],1:[],2:[],3:[]};
-  AW().forEach(e=>byPhase[phaseOf(e.w)].push(e.w));
-  const cols=COLS.map(c=>`<div class="col"><div class="mgrid">${byPhase[c.p].map(w=>`<button class="mb${q.has(w)?' queued':''}" type="button" data-w="${esc(w)}" aria-label="${esc(w)}">${PILES[c.p].m}</button>`).join('')}</div></div>`).join('');
-  const heads=COLS.map(c=>`<div class="colhead"><b>${PILES[c.p].m} ${byPhase[c.p].length}</b><span>${c.n}</span>${c.s?`<small>${c.s}</small>`:''}</div>`).join('');
-  const queue=(state.queue||[]).filter(w=>BY[w]);
-  stage.innerHTML=`<section class="wordsTop">
-      <button class="soft" id="wback" type="button">← Back</button>
-      <div class="qbox"><b>My queue${queue.length?` (${queue.length})`:''}</b>${queue.length?`<div class="chips left">${queue.map(w=>`<button class="chip" type="button" data-unq="${esc(w)}" aria-label="Take ${esc(w)} out of the queue">${esc(w)} ✕</button>`).join('')}</div>`:'<p class="hint">Tap a moon, then “Add to my queue”. Those words come next.</p>'}</div>
-    </section>
-    ${practiceHTML()}
-    <div class="board">${cols}</div>
-    <div class="heads">${heads}</div>
-    <div class="wpop" id="pop" hidden></div>`;
-  $('#wback').onclick=()=>{ hush(); window.scrollTo(0,0);
-    if(wordsFrom==='word' && sess && cur) return resumeWord();
-    if(wordsFrom==='cloud' && sess && cur && cur.cloud){ view='cloud'; return render(); }
-    view=wordsFrom==='end'&&sess?'end':'start'; render(); };
+  $('#wg').innerHTML=list.length ? list.slice(pageAt*per,(pageAt+1)*per).map(w=>`<button class="chip${q.has(w)?' inq':''}" type="button" data-w="${esc(w)}">${esc(w)}</button>`).join('') : `<p class="hint" style="grid-column:1/-1;text-align:center">No words here yet.</p>`;
+  wirePager();
   stage.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>openPop(b.dataset.w));
-  stage.querySelectorAll('[data-pw]').forEach(b=>b.onclick=()=>openPop(b.dataset.pw));
-  stage.querySelectorAll('[data-unq]').forEach(b=>b.onclick=()=>{ state.queue=(state.queue||[]).filter(x=>x!==b.dataset.unq); save(); renderWords(); });
+  if(popWord) openPop(popWord,true);
 }
 const STATUS=['Not tried yet','','You can read it and you know what it means','You can read it, you know it and you can spell it!'];
 function openPop(w, silent){
-  popWord=w; const p=$('#pop'), r=state.words[w], ph=phaseOf(w);
+  popWord=w; const p=$('#pop'), r=state.words[w]||{}, ph=phaseOf(w); if(!p) return;
   const status= ph===1 ? (r.know?'You know what it means. Next: reading it.':'You can read it. Next: what it means.') : STATUS[ph];
   const inQ=(state.queue||[]).includes(w);
   p.innerHTML=`<div class="popcard" role="dialog" aria-modal="true" aria-label="${esc(w)}">
-      <div class="bigword">${esc(w)}</div>
+      <button class="bigword" type="button" id="pSay" aria-label="Hear it">${esc(w)}</button>
       <p class="hint">${PILES[ph].m} ${esc(status)}</p>
-      <button class="soft" type="button" id="pSay">🔊 Say it again</button>
-      <details class="pmean"><summary>What does it mean?</summary><div class="explain">${explainHTML(BY[w])}</div>${moreBtn(BY[w])}</details>
+      <details class="pmean"><summary>What does it mean?</summary><div class="explain">${explainHTML(BY[w])}</div></details>
       <div class="row center">
-        <button class="soft${inQ?' inq':''}" type="button" id="pQ">${inQ?'✓ In my queue (tap to take out)':'➕ Add to my queue'}</button>
-        <button class="soft" type="button" id="pClose">✕ Close</button>
+        <button class="soft${inQ?' inq':''}" type="button" id="pQ">${inQ?'✓ In my queue':'➕ Add to my queue'}</button>
         ${ph<3?`<button class="soft up" type="button" id="pUp">${PILES[ph+1].m} ${esc(UPTEXT[ph])}</button>`:''}
+        <button class="soft" type="button" id="pClose">✕ Close</button>
       </div>
     </div>`;
   p.hidden=false;
+  if(!silent) say([w],{noRemember:true,need:true});
   $('#pSay').onclick=()=>say([w],{noRemember:true,need:true});
-  $('#pQ').onclick=()=>{ const qq=state.queue||(state.queue=[]); if(qq.includes(w)) state.queue=qq.filter(x=>x!==w); else { qq.push(w); chime('good'); } save(); renderWords(); openPop(w,true); };
+  $('#pQ').onclick=()=>{ const qq=state.queue||(state.queue=[]); if(qq.includes(w)) state.queue=qq.filter(x=>x!==w); else { qq.push(w); chime('good'); } save(); render(); };
   $('#pClose').onclick=closePop;
   const pm=p.querySelector('.pmean'); if(pm) pm.addEventListener('toggle',()=>{ if(pm.open) say(explainLines(BY[w]),{noRemember:true,need:true}); });
-  wireMore(BY[w]);
-  const up=$('#pUp'); if(up) up.onclick=()=>{ moveUp(w); chime(phaseOf(w)===3?'full':'good'); save(); renderWords(); openPop(w,true); };
+  const up=$('#pUp'); if(up) up.onclick=()=>{ moveUp(w); chime(phaseOf(w)===3?'full':'good'); save(); render(); };
   p.onclick=ev=>{ if(ev.target===p) closePop(); };
 }
-/* "Move up a moon": she is sure, so the word goes one column along.
+/* "Move up a moon": she is sure, so the word goes one pile along.
    New -> crescent (she knows what it means); crescent -> half (reads and knows); half -> full (spells it too). */
 const UPTEXT=['I know what it means','I can read it and know it','I can spell it too'];
 function moveUp(w){
@@ -3981,18 +4059,6 @@ function moveUp(w){
   else if(ph===1){ r.read=1; r.know=1; }
   else if(ph===2){ r.spell=1; }
   r.movedUp=(r.movedUp||0)+1; if(!r.seen) r.seen=1; r.last=Date.now();
-}
-/* Words she has met but not finished, and full moons waiting for a check-up */
-function practiceHTML(){
-  const need=w=>{ const r=state.words[w]; return !r.read?'reading':!r.know?'meaning':(r.spellMiss&&!r.spell?'spelling (twice)':'spelling'); };
-  const prac=Object.keys(state.words).filter(w=>BY[w]&&state.words[w].seen>0&&phaseOf(w)<3).sort((a,b)=>state.words[b].last-state.words[a].last);
-  const cdue=w=>{ const r=state.words[w]; return Math.min(r.spell&&r.due?r.due:Infinity, r.know&&r.mdue?r.mdue:Infinity); };
-  const checks=Object.keys(state.words).filter(w=>BY[w]&&cdue(w)<Infinity).sort((a,b)=>cdue(a)-cdue(b));
-  const now=Date.now();
-  return `<details class="practice"><summary>\uD83D\uDD01 Practising (${prac.length}) \u00B7 Check-ups (${checks.length})</summary>
-    ${prac.length?`<p class="hint">Still growing. What\u2019s next for each word:</p><div class="chips left">${prac.map(w=>`<button class="chip" type="button" data-pw="${esc(w)}">${PILES[phaseOf(w)].m} ${esc(w)} <small>${need(w)}</small></button>`).join('')}</div>`:'<p class="hint">Nothing here yet.</p>'}
-    ${checks.length?`<p class="hint">Coming back for a check-up (spelling, or meaning she was still remembering):</p><div class="chips left">${checks.map(w=>`<button class="chip" type="button" data-pw="${esc(w)}">${PILES[phaseOf(w)].m} ${esc(w)} <small>${state.words[w].spell&&state.words[w].due?'spelling':'meaning'} · ${cdue(w)<=now?'due now':shortDate(cdue(w))}</small></button>`).join('')}</div>`:''}
-  </details>`;
 }
 function closePop(){ const p=$('#pop'); if(p){ p.hidden=true; p.innerHTML=''; } popWord=null; hush(); }
 
@@ -4013,13 +4079,15 @@ function tidyWords(){
     if(r.spell && r.spellTested && !r.due && !r.reviewDone){ r.box=0; r.due=now+REVIEW[0]; }
     if((!r.spell || !r.spellTested) && r.due){ r.due=null; r.box=null; }
     if(!r.know && r.mdue){ r.mdue=null; r.mbox=null; }
+    if(!r.read && r.rdue){ r.rdue=null; r.rbox=null; }
   }
   checkBadges();
 }
 const reviewDue=()=>{ const now=Date.now(), out=[];
   Object.keys(state.words).forEach(w=>{ const r=state.words[w]; if(!BY[w]) return;
     if(r.spell && r.due && r.due<=now) out.push({w,kind:'spell',at:r.due});
-    else if(r.know && r.mdue && r.mdue<=now) out.push({w,kind:'mean',at:r.mdue}); });
+    else if(r.know && r.mdue && r.mdue<=now) out.push({w,kind:'mean',at:r.mdue});
+    else if(r.read && r.rdue && r.rdue<=now) out.push({w,kind:'read',at:r.rdue}); });
   return out.sort((a,b)=>a.at-b.at); };
 function passMeaning(r){ r.mbox=(r.mbox||0)+1; r.mdue = r.mbox>=REVIEW.length ? null : Date.now()+REVIEW[r.mbox]; }
 function passReview(r){ r.box=(r.box||0)+1; if(r.box>=REVIEW.length){ r.reviewDone=1; r.due=null; } else r.due=Date.now()+REVIEW[r.box]; r.lastCheck=Date.now(); }
@@ -4044,33 +4112,36 @@ function checkBadges(){
   { const st=sayingsTier(); if(st>(state.badges.sayings||0)){ state.badges.sayings=st; if(appReady) setTimeout(()=>toast(`${BADGE[st]} New ${BADGE_NAME[st]} badge: Sayings!`,'full'),400); } }
   TOPICS.filter(topicOn).forEach(t=>{ const tier=tierOf(t); if(tier>(state.badges[t.id]||0)){ state.badges[t.id]=tier; if(appReady) setTimeout(()=>toast(`${BADGE[tier]} New ${BADGE_NAME[tier]} badge: ${t.name}!`,'full'),400); } });
 }
-let badgesFrom='start', topicPop=null;
-function openBadges(from){ stopGame(); clearTimers(); hush(); badgesFrom=from||'start'; topicPop=null; view='badges'; render(); window.scrollTo(0,0); }
+let topicPop=null;
+function openBadges(){ stopGame(); clearTimers(); hush(); topicPop=null; pageAt=0; view='badges'; render(); }
+function badgeCards(){
+  const n=Object.keys(got()).length, st=sayingsTier();
+  const tiers=t=>`<div class="tiers">${[1,2,3].map(i=>`<span class="${t>=i?'on':''}">${BADGE[i]}</span>`).join('')}</div>`;
+  const cards=[`<div class="bcard${st?' got':''}"><div class="bhead"><span class="bemoji">💬</span><b>Sayings</b></div>${tiers(st)}<div class="bar"><i style="width:${Math.round(100*n/Math.max(1,PHRASES.length))}%"></i></div><small>${n} of ${PHRASES.length}</small></div>`];
+  TOPICS.filter(topicOn).forEach(t=>{ const s=topicStats(t), tier=state.badges&&state.badges[t.id]||0;
+    cards.push(`<button class="bcard${tier?' got':''}" type="button" data-topic="${t.id}"><div class="bhead"><span class="bemoji">${t.emoji}</span><b>${esc(t.name)}</b></div>${tiers(tier)}<div class="bar"><i style="width:${Math.round(100*s.full/Math.max(1,s.total))}%"></i></div><small>${s.full} of ${s.total}</small></button>`); });
+  cards.push(`<button class="bcard" type="button" id="bPacks"><div class="bhead"><span class="bemoji">📦</span><b>Word packs</b></div><small>More words to unlock</small></button>`);
+  return cards;
+}
 function renderBadges(){
-  stage.innerHTML=`<section class="wordsTop"><button class="soft" id="bback" type="button">← Back</button><h2 style="align-self:center">🏅 Badges</h2></section>
-    <p class="hint">Fill the moons of a topic’s words to earn its badges: ${BADGE[1]} 5 words, ${BADGE[2]} more than half, ${BADGE[3]} every word.</p>
-    <div class="bgrid"><div class="bcard${sayingsTier()?' got':''}"><div class="bhead"><span class="bemoji">💬</span><b>Sayings</b></div><div class="tiers">${[1,2,3].map(i=>`<span class="${sayingsTier()>=i?'on':''}">${BADGE[i]}</span>`).join('')}</div><div class="bar"><i style="width:${Math.round(100*Object.keys(got()).length/Math.max(1,PHRASES.length))}%"></i></div><small>${Object.keys(got()).length} of ${PHRASES.length} collected</small><div class="row center"><button class="small" type="button" id="bsay">💬 Sayings</button></div></div>${TOPICS.filter(topicOn).map(t=>{ const s=topicStats(t), tier=state.badges&&state.badges[t.id]||0, L=LESSONS.find(l=>l.topic===t.id);
-      return `<div class="bcard${tier?' got':''}"><div class="bhead"><span class="bemoji">${t.emoji}</span><b>${esc(t.name)}</b></div>
-        <div class="tiers">${[1,2,3].map(i=>`<span class="${tier>=i?'on':''}">${BADGE[i]}</span>`).join('')}</div>
-        <div class="bar"><i style="width:${Math.round(100*s.full/Math.max(1,s.total))}%"></i></div>
-        <small>${s.full} of ${s.total} full moons</small>
-        <div class="row center"><button class="small" type="button" data-topic="${t.id}">🌙 Words</button>${L?`<button class="small" type="button" data-lesson="${L.id}">📘 Lesson</button>`:''}</div></div>`; }).join('')}</div>
-    ${packsHTML()}
-    <div class="wpop" id="tpop" hidden></div>`;
-  $('#bback').onclick=()=>{ hush(); view=badgesFrom==='end'&&sess?'end':'start'; render(); };
+  const cards=badgeCards(), cols=window.innerWidth>=560?3:2;
+  stage.innerHTML=`<section class="listpage"><div class="bgrid paged" id="bg" style="grid-template-columns:repeat(${cols},minmax(0,1fr))"></div><div id="pg"></div><div class="wpop" id="tpop" hidden></div></section>`;
+  const per=cols*fitRows(172,70);
+  $('#pg').outerHTML=pagerHTML(cards.length, per)||'<div></div>';
+  $('#bg').innerHTML=cards.slice(pageAt*per,(pageAt+1)*per).join('');
+  wirePager();
   stage.querySelectorAll('[data-topic]').forEach(b=>b.onclick=()=>openTopic(b.dataset.topic));
-  stage.querySelectorAll('[data-lesson]').forEach(b=>b.onclick=()=>startLesson(LESSONS.find(l=>l.id===b.dataset.lesson),'badges'));
-  wirePacks();
-  const bs=$('#bsay'); if(bs) bs.onclick=()=>openSayings('badges');
+  const bp=$('#bPacks'); if(bp) bp.onclick=()=>{ pageAt=0; view='packs'; render(); };
 }
 function openTopic(id){
   const t=TOPICS.find(x=>x.id===id), p=$('#tpop'); if(!t||!p) return;
+  const L=LESSONS.find(l=>l.topic===t.id);
   p.innerHTML=`<div class="popcard"><h3>${t.emoji} ${esc(t.name)}</h3>
-    <div class="chips">${t.words.map(w=>`<button class="chip" type="button" data-say="${esc(w)}">${PILES[phaseOf(w)].m} ${esc(w)}</button>`).join('')}</div>
-    <p class="hint">Tap a word to hear it. Add words to your queue from 🌙 My words.</p>
-    <button class="soft" type="button" id="tclose">✕ Close</button></div>`;
+    <div class="chips" style="max-height:40dvh;overflow:hidden">${t.words.slice(0,40).map(w=>`<button class="chip" type="button" data-say="${esc(w)}">${PILES[phaseOf(w)].m} ${esc(w)}</button>`).join('')}</div>
+    <div class="row center">${L?`<button class="soft" type="button" id="tles">📘 Lesson</button>`:''}<button class="soft" type="button" id="tclose">✕ Close</button></div></div>`;
   p.hidden=false;
   p.querySelectorAll('[data-say]').forEach(b=>b.onclick=()=>say([b.dataset.say],{noRemember:true,need:true}));
+  const tl=$('#tles'); if(tl) tl.onclick=()=>startLesson(L);
   $('#tclose').onclick=()=>{ p.hidden=true; hush(); };
   p.onclick=ev=>{ if(ev.target===p){ p.hidden=true; hush(); } };
 }
@@ -4080,21 +4151,21 @@ function openTopic(id){
 let lessonFrom='flow';
 function nextLesson(){ const seen=new Set(state.lessonsSeen||[]); return LESSONS.find(l=>!seen.has(l.id))||null; }
 function lessonLines(L){ return [L.title+'.', {pause:600}].concat(L.text.split(/(?<=[.!?])\s+/).reduce((a,s)=>{ if(a.length) a.push({pause:350}); a.push(s); return a; },[])); }
-function startLesson(L, from){
+let lessonNow=null;
+function startLesson(L){
   if(!L) return;
-  stopGame(); clearTimers(); hush(); lessonFrom=from||'flow';
-  cur={lesson:L}; view='lesson'; render(); window.scrollTo(0,0);
+  stopGame(); clearTimers(); hush();
+  lessonNow=L; view='lesson'; render();
   say(lessonLines(L),{noRemember:true});
 }
 function renderLesson(){
-  const L=cur.lesson, t=TOPICS.find(x=>x.id===L.topic);
-  stage.innerHTML=`<section class="stage"><span class="tag">📘 Concept lesson${t?' · '+esc(t.name):''}</span>
-    <h2 class="ask" style="font-size:clamp(26px,6vw,38px)">${esc(L.title)}</h2>
+  const L=lessonNow; if(!L){ view='badges'; return render(); }
+  stage.innerHTML=`<section class="stage">
+    <h2 class="ask">📘 ${esc(L.title)}</h2>
     <div class="deep lesson">${L.text.split(/(?<=[.!?])\s+/).map(s=>`<p>${esc(s)}</p>`).join('')}</div>
-    <div class="row center"><button class="soft" type="button" id="lagain">🔊 Read it again</button><button class="big" type="button" id="ldone">Got it ➜</button></div></section>`;
+    <div class="row center"><button class="soft" type="button" id="lagain">🔊 Read it again</button>${nextHTML}</div></section>`;
   $('#lagain').onclick=()=>say(lessonLines(L),{noRemember:true,need:true});
-  $('#ldone').onclick=()=>{ state.lessonsSeen=Array.from(new Set((state.lessonsSeen||[]).concat(L.id))); save(); hush();
-    if(lessonFrom==='badges'){ view='badges'; render(); } else nextOne(false); };
+  $('#nextBtn').onclick=()=>{ state.lessonsSeen=Array.from(new Set((state.lessonsSeen||[]).concat(L.id))); save(); hush(); view='badges'; render(); };
 }
 
 /* Count every word she works through: each 10 earns a Moon Run life; each 20 brings a concept lesson. */
@@ -4119,30 +4190,26 @@ function gameState(){ const g=state.game||(state.game={levelMax:1,lives:3,runs:0
   return g; }
 const toNextLife=()=>10-((state.wordsGone||0)%10);
 function stopGame(){ if(G){ cancelAnimationFrame(G.raf); G.stopped=true; } G=null; }
-function openGame(from){ stopGame(); clearTimers(); hush(); gameFrom=from||'start'; view='game'; render(); window.scrollTo(0,0); }
+function openGame(){ stopGame(); clearTimers(); hush(); view='game'; render(); }
 function renderGame(){
-  const full=pileCounts()[3], g=gameState();
+  const g=gameState();
   const done=wordsPlayed();
   if(done<GAME_UNLOCK){
-    stage.innerHTML=`<section class="hero"><div style="font-size:72px">🐺🌕</div><h1>Moon Run</h1>
+    stage.innerHTML=`<section class="hero"><div style="font-size:72px">🐺🌕</div><h1>Wolf Run</h1>
       <p class="sub">🔒 Unlocks after ${GAME_UNLOCK} words. You have done ${done}.</p>
       <div class="bar" style="width:min(320px,80%)"><i style="width:${Math.round(100*done/GAME_UNLOCK)}%"></i></div>
-      <p class="hint">Every 10 words you play earns a life. You have ${g.lives||0} 🐾 so far.</p>
-      <button class="soft" id="gback" type="button">← Back</button></section>`;
-    $('#gback').onclick=()=>{ view=gameFrom==='end'&&sess?'end':'start'; render(); };
+      <p class="hint">Every 10 words you play earns a life. You have ${g.lives||0} 🐾 so far.</p></section>`;
     return;
   }
   stage.innerHTML=`<section class="gamebox">
-      <div class="gtop"><button class="small" id="gback" type="button">← Back</button><span id="ginfo" class="ginfo"></span><span id="glives" class="glives"></span></div>
+      <div class="gtop"><span id="ginfo" class="ginfo"></span><span id="glives" class="glives"></span></div>
       <div class="gprog"><i id="gbar"></i><span>🌕</span></div>
-      <div class="gwrap"><canvas id="gc" aria-label="Moon Run game: drag to move, tap to jump"></canvas><div class="gover" id="gover"></div></div>
-      <p class="hint">Drag left and right to run around trees. Tap to jump over rocks, logs and holes. Keys: ← → and space.</p></section>`;
-  $('#gback').onclick=()=>{ stopGame(); hush(); view=gameFrom==='end'&&sess?'end':'start'; render(); };
+      <div class="gwrap"><canvas id="gc" aria-label="Wolf Run game: drag to move, tap to jump"></canvas><div class="gover" id="gover"></div></div></section>`;
   gameMenu();
 }
 function gameMenu(msg){
   const g=gameState(), o=$('#gover'); if(!o) return;
-  o.innerHTML=`<div class="gcard">${msg||`<h2>🐺 Moon Run</h2><p>Run by the light of the full moon. Don’t let the darkness catch you, or you’ll turn back into a human!</p>`}
+  o.innerHTML=`<div class="gcard">${msg||`<h2>🐺 Wolf Run</h2><p>Run by the light of the full moon. Drag to dodge trees, tap to jump. Don’t let the darkness catch you!</p>`}
     <p class="hint">Lives: ${g.lives||0} 🐾 · next life in ${toNextLife()} word${toNextLife()===1?'':'s'}</p>
     ${(g.lives||0)<=0?'<p><b>No lives left.</b> Play 10 words to earn a life, then come back!</p>':''}
     <div class="row center">${LEVELS.map((L,i)=>`<button class="${i+1===Math.min(g.levelMax||1,5)?'big':'soft'}" type="button" data-lv="${i+1}" ${(i+1>(g.levelMax||1)||(g.lives||0)<=0)?'disabled':''}>${i+1>(g.levelMax||1)?'🔒 ':''}Level ${i+1}</button>`).join('')}</div>
@@ -4153,7 +4220,7 @@ function gameMenu(msg){
 }
 function sizeCanvas(){
   const cv=$('#gc'); if(!cv) return null;
-  const W=cv.clientWidth||340, H=Math.round(Math.min(window.innerHeight*0.66, 640, W*1.45));
+  const W=cv.clientWidth||340, top=cv.getBoundingClientRect().top, H=Math.round(Math.max(220, Math.min(window.innerHeight-top-14, 640, W*1.45)));
   const dpr=Math.min(window.devicePixelRatio||1,2);
   cv.style.height=H+'px'; cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr);
   const ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
@@ -4320,126 +4387,117 @@ window.addEventListener('resize',()=>{ if(view==='game' && G && G.state!=='run')
 
 
 /* =================== Sayings (expressions and phrases) ===================
-   phrases.txt: id|saying|meaning|example|note. One comes up every 15 words; all are on the Sayings page.
-   She guesses, taps "Show me", then "I knew it" or "New to me": either way it goes in her collection. */
+   phrases.txt: id|saying|meaning|example|note. The Sayings button plays a round of 5, one at a time:
+   new ones first, then the ones she met longest ago. The same four answers:
+   ✗ / ≈ = Luna explains it (collected as new to her); ✓ = Luna explains it to check (collected as known); 🌕 = known, straight on. */
 const PHRASES=PHRASERAW.split(String.fromCharCode(10)).map(l=>l.trim()).filter(l=>l&&l[0]!=='#').map(l=>{ const f=l.split('|'); return {id:f[0],phrase:f[1],meaning:f[2],example:f[3]||'',note:f[4]||''}; });
 const got=()=>state.sayings||(state.sayings={});
-const nextPhrase=()=>PHRASES.find(p=>!got()[p.id])||null;
+const SAY_ROUND=5;
+function nextPhrase(){
+  const inRound=new Set(sess?sess.list:[]);
+  const fresh=PHRASES.find(p=>!got()[p.id] && !inRound.has(p.id)); if(fresh) return fresh;
+  return PHRASES.filter(p=>!inRound.has(p.id)).sort((a,b)=>(got()[a.id].at||0)-(got()[b.id].at||0))[0]||null;
+}
 function sayingsTier(){ const n=Object.keys(got()).length, t=PHRASES.length; return n>=t?3 : n>=Math.ceil(t*0.6)?2 : n>=5?1 : 0; }
-let phraseFrom='flow';
-function startPhrase(P, from){
+function startPhrase(P, prefix){
   if(!P) return;
-  stopGame(); clearTimers(); hush(); phraseFrom=from||'flow';
-  cur={phrase:P, shown:false}; view='phrase'; render(); window.scrollTo(0,0);
-  say(['Here is a saying.', {pause:400}, P.phrase+'.', {pause:500}, 'What do you think it means?']);
+  stopGame(); clearTimers(); hush();
+  if(sess) sess.list.push(P.id);
+  cur={phrase:P, shown:false}; view='phrase'; render();
+  say((prefix||[]).concat(['Here is a saying.', {pause:400}, P.phrase+'.', {pause:500}, 'Do you know what it means?']));
 }
 function phraseLines(P){ const out=[`It means: ${P.meaning}.`, {pause:500}, `For example: ${P.example}`]; if(P.note) out.push({pause:500}, P.note); return out; }
 function renderPhrase(){
-  const P=cur.phrase, have=got()[P.id];
-  stage.innerHTML=`<section class="stage"><span class="tag">💬 Saying</span>
-    <h2 class="phrasebig">“${esc(P.phrase)}”</h2>
-    ${cur.shown?`<div class="deep lesson"><p><b>It means:</b> ${esc(P.meaning)}.</p><p><i>${esc(P.example)}</i></p>${P.note?`<p class="hint">${esc(P.note)}</p>`:''}</div>
-      <div class="row center"><button class="soft" type="button" id="pagain">🔊 Hear it again</button></div>
-      ${phraseFrom==='sayings'&&have?`<button class="big" type="button" id="pback">Back to my sayings ➜</button>`:`<div class="row center"><button class="sure" type="button" id="pknew">I knew it ✓</button><button class="again" type="button" id="pnew">New to me ✨</button></div>`}`
-    :`<p class="ask">What do you think it means?</p><div class="row center"><button class="soft" type="button" id="pagain">🔊 Hear it</button><button class="big" type="button" id="pshow">Show me 👀</button></div>`}
-  </section>`;
-  const again=$('#pagain'); if(again) again.onclick=()=>say(cur.shown?[P.phrase+'.',{pause:400}].concat(phraseLines(P)):[P.phrase+'.'],{noRemember:true,need:true});
-  const show=$('#pshow'); if(show) show.onclick=()=>{ cur.shown=true; render(); say(phraseLines(P)); };
-  const done=known=>{ got()[P.id]={known:known?1:0, at:Date.now()}; save(); chime('good');
-    toast(`💬 Saying collected: ${Object.keys(got()).length} of ${PHRASES.length}`);
-    if(phraseFrom==='sayings'){ view='sayings'; render(); } else nextOne(false); };
-  const k=$('#pknew'); if(k) k.onclick=()=>done(true);
-  const n=$('#pnew'); if(n) n.onclick=()=>done(false);
-  const b=$('#pback'); if(b) b.onclick=()=>{ hush(); view='sayings'; render(); };
-}
-let sayingsFrom='start';
-function openSayings(from){ stopGame(); clearTimers(); hush(); sayingsFrom=from||'start'; view='sayings'; render(); window.scrollTo(0,0); }
-function renderSayings(){
-  const g=got(), n=Object.keys(g).length, tier=sayingsTier();
-  stage.innerHTML=`<section class="wordsTop"><button class="soft" id="sback" type="button">← Back</button><h2 style="align-self:center">💬 Sayings</h2></section>
-    <p class="hint">Expressions people use every day. You’ve collected ${n} of ${PHRASES.length}. Tap one to learn it.</p>
-    <div class="tiers" style="justify-content:center">${[1,2,3].map(i=>`<span class="${tier>=i?'on':''}">${BADGE[i]}</span>`).join('')}</div>
-    <div class="sgrid">${PHRASES.map(P=>`<button class="scard${g[P.id]?' got':''}" type="button" data-ph="${esc(P.id)}">${g[P.id]?'✅':'✨'} ${esc(P.phrase)}</button>`).join('')}</div>`;
-  $('#sback').onclick=()=>{ view=sayingsFrom==='end'&&sess?'end':sayingsFrom==='badges'?'badges':'start'; render(); };
-  stage.querySelectorAll('[data-ph]').forEach(b=>b.onclick=()=>{ const P=PHRASES.find(x=>x.id===b.dataset.ph); if(!P) return;
-    startPhrase(P,'sayings'); if(got()[P.id]){ cur.shown=true; render(); } });
+  const P=cur.phrase;
+  stage.innerHTML=`<section class="stage">
+    <button class="phrasebig" type="button" id="pagain" aria-label="Hear it again">“${esc(P.phrase)}”</button>
+    ${cur.shown?`<div class="deep lesson pop"><p><b>It means:</b> ${esc(P.meaning)}.</p><p><i>${esc(P.example)}</i></p>${P.note?`<p class="hint">${esc(P.note)}</p>`:''}</div>${nextHTML}`
+      :`<p class="ask">Do you know what it means?</p>${quadHTML()}`}
+    <div class="fb" id="fb"></div></section>`;
+  $('#pagain').onclick=()=>say(cur.shown?[P.phrase+'.',{pause:400}].concat(phraseLines(P)):[P.phrase+'.'],{noRemember:true,need:true});
+  const collect=known=>{ const had=!!got()[P.id]; got()[P.id]={known:known?1:0, at:Date.now()}; save(); if(!had) toast(`💬 Saying collected: ${Object.keys(got()).length} of ${PHRASES.length}`); };
+  stage.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{ const k=b.dataset.q;
+    if(k==='full'){ collect(true); chime('full'); stage.querySelectorAll('button').forEach(x=>x.disabled=true); feedback('good','Full moon!'); later(()=>nextOne(),700); return; }
+    collect(k==='yes'); chime(k==='yes'?'good':'try'); cur.shown=true; render(); say(phraseLines(P)); });
+  const nb=$('#nextBtn'); if(nb) nb.onclick=()=>nextOne();
 }
 
 /* =================== Word clouds only ===================
    A round of word clouds and nothing else: 10 words a cloud, quick to sort. Good for a first go, to bank lots of words. */
 const CLOUD_ROUND=6;
 
-/* =================== Grown-ups page =================== */
-let resetArmed=false;
+/* =================== Grown-ups page ===================
+   Tabs, so each part fits on one screen: Voice, Words, Backup, Names. */
+let resetArmed=false, grownTab='voice';
+const GTABS=[['voice','🔊 Voice'],['words','🌙 Words'],['backup','💾 Backup'],['names','👤 Names']];
 function renderGrown(){
+  const on=(id,fn,ev)=>{ const el=$('#'+id); if(el) el[ev||'onclick']=fn; };
   const c=pileCounts();
-  const voices=['buttery','airy','glassy','rounded'];
-  const dvList=deviceVoices().filter(v=>voiceScore(v)>-50).slice(0,STANDALONE?12:8);
-  const voiceHTML = tts && !ttsBlocked
-    ? `<p>${esc(voiceNote())}</p><div class="row">${voices.map(v=>`<button class="pill" type="button" data-voice="${v}" aria-pressed="${state.voice===v}">${cap(v)}</button><button class="small" type="button" data-try="${v}">Try</button>`).join('')}</div>`
-    : `<p>${esc(voiceNote())}</p>${ttsSettled&&!ttsBlocked&&dvList.length?`<p>Pick the voice that sounds best on this device (tap to hear it):</p><div class="row">${dvList.map((v,i)=>`<button class="pill" type="button" data-dv="${i}" aria-pressed="${bVoice===v}">${esc(v.name.replace(/^Microsoft |^Google /,'').replace(/ - .*$/,''))}</button>`).join('')}</div>${STANDALONE?'':'<p>On an iPhone, nicer voices can be added in Settings › Accessibility › Spoken Content › Voices › English (pick one marked Enhanced or Premium), then reopen this page.</p>'}`:''}${STANDALONE?betterVoiceTips():''}`;
-  const lists=[1,2,3].map(i=>({i,ws:AW().filter(e=>phaseOf(e.w)===i).map(e=>e.w)}));
-  const met=Object.keys(state.words).filter(w=>BY[w]&&state.words[w].seen>0&&phaseOf(w)===0);
-  const saved = STANDALONE ? 'Progress is saved on this device. To move it to another phone or browser, use Backup below.'
-    : saveStatus==='ok' ? (lastSaved?`Saved for Claude to read at ${new Date(lastSaved).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}.`:'Saving works. Progress is kept for Claude to read.')
-    : saveStatus==='local' ? 'Saved on this device only (open it on claude.ai, signed in, to keep it everywhere).'
-    : saveStatus==='checking' ? 'Checking saving…' : 'Saving had a problem. Progress is still kept on this device.';
-  stage.innerHTML=`<section class="stage" style="align-items:flex-start;text-align:left;padding-top:0"><h2>Grown-ups</h2></section>
-  <div class="panel"><h3>How it works</h3>
-    <p>One word at a time. First she says if she can read it (✓ or ✗). If ✓, Luna says three look-alike words while three dots grow, and she taps the right dot. Then she says if she knows what it means; ✓ shows the meaning to check, ✗ explains it and moves on. Only when she can read it and knows it does she spell it (letter keyboard, or skip for later). After each right answer she picks “I’m sure” (it moves up) or “Test me again” (it stays to practise). Words in her queue (from My words) come first, then new words, most useful first; unfinished words come back every few words.</p>
-    <p>Moon: ${PILES[0].m} new → ${PILES[1].m} reads it or knows it → ${PILES[2].m} reads and knows it → ${PILES[3].m} spells it too.</p>
-    <p>${saved}</p></div>
-  <div class="panel"><h3>Luna's voice</h3>${voiceHTML}
-    <label class="row"><span style="color:var(--muted);font-size:15px">Speed</span><input type="range" id="rate" min="0.7" max="1.2" step="0.05" value="${state.rate}"></label>
-    <div class="row"><button class="pill" type="button" id="soundT" aria-pressed="${state.sound}">Sound ${state.sound?'on':'off'}</button><button class="pill" type="button" id="readT" aria-pressed="${state.readMode==='needed'}">Read aloud: ${state.readMode==='needed'?'only when needed':'everything'}</button></div>
-    <p>“Only when needed” still says the three dot words, the spelling word, and anything she taps 🔊 for. Good for confident readers and grown-ups.</p></div>
-  <div class="panel"><h3>Words in a round</h3><div class="row">${[8,12,16,24].map(n=>`<button class="pill" type="button" data-per="${n}" aria-pressed="${state.perRound===n}">${n}</button>`).join('')}</div></div>
-  <div class="panel"><h3>Which words come up</h3><p>Words she queued in My words come first. Then mostly medium words and interesting “wow” words, with an easy word now and then, and a word she hasn't finished every 5th word. “I know it all” banks a word as a full moon and doesn't use up the round.</p></div>
-    <p>Earlier words are not lost; they come in when the later ones run out.</p></div>
-  <div class="panel"><h3>The piles</h3><div class="pilelist">
-    <div>${PILES[0].m} <b>New</b> <span>(${PILES[0].long}): ${c[0]}${met.length?`, met but not yet: ${met.map(esc).join(', ')}`:''}</span></div>
-    ${lists.map(l=>`<div>${PILES[l.i].m} <b>${PILES[l.i].n}</b> <span>(${PILES[l.i].long}): ${l.ws.length}${l.ws.length?`<br>${l.ws.map(esc).join(', ')}`:''}</span></div>`).join('')}
-    <div><span>Words in the game: ${AW().length}. More can be added.</span></div></div></div>
-  <div class="panel"><h3>Copy progress</h3><div class="row"><button class="pill" type="button" id="copy">Copy progress</button><span id="copied" style="color:var(--muted);font-size:14px"></span></div><div id="copyBox"></div></div>
-  <div class="panel"><h3>Backup</h3><p>A backup code holds every name’s words and moons. Copy it to keep progress safe, or to move it to another phone or browser: open Word Moon there, paste the code below and tap Load backup.</p>
-    <div class="row"><button class="pill" type="button" id="bkCopy">Copy backup code</button>${STANDALONE?'':'<button class="pill" type="button" id="bkMove">🚀 Move to the Word Moon website</button>'}<span id="bkMsg" style="color:var(--muted);font-size:14px"></span></div><div id="bkBox"></div>
-    ${STANDALONE?'<div class="row"><button class="pill" type="button" id="bkPaste">📋 Paste backup code</button></div>':''}
-    <textarea id="bkIn" placeholder="Paste a backup code here" aria-label="Backup code to load"></textarea>
-    <div class="row"><button class="pill${restoreArmed?' danger':''}" type="button" id="bkLoad">${restoreArmed?esc(restoreArmed.msg):'Load backup'}</button></div></div>
-  <div class="panel"><h3>Names</h3><p>Playing now: <b>${esc(playerName())}</b>. Each name keeps its own progress${uid?' (saved on this device and to this Claude account)':' (saved on this device)'}.</p>
-    <div class="row">${players.map(p=>`<button class="pill${whoArmed===p.id?' danger':''}" type="button" data-rm="${esc(p.id)}">${whoArmed===p.id?'Tap again to remove '+esc(p.name):'Remove '+esc(p.name)}</button>`).join('')}</div></div>
-  <div class="panel"><h3>Start again</h3><div class="row"><button class="pill danger" type="button" id="reset">${resetArmed?'Tap again to wipe all words':'Wipe all progress'}</button></div></div>
-  <div class="row"><button class="big" id="back" type="button">← Back</button></div>`;
-
-  stage.querySelectorAll('[data-voice]').forEach(b=>b.onclick=()=>{ state.voice=b.dataset.voice; save(); render(); });
-  stage.querySelectorAll('[data-try]').forEach(b=>b.onclick=()=>say(['Hi! I’m Luna. Can you read this word?'],{voice:b.dataset.try,noRemember:true,need:true}));
-  stage.querySelectorAll('[data-dv]').forEach(b=>b.onclick=()=>{ const v=dvList[+b.dataset.dv]; if(!v) return; bVoice=v; state.deviceVoice=v.name; save(); render(); browserSay(['Hi! I’m Luna. Can you read this word?']); });
-  $('#rate').onchange=ev=>{ state.rate=+ev.target.value; save(); say(['This is my new speed.'],{noRemember:true,need:true}); };
-  $('#readT').onclick=()=>{ state.readMode=state.readMode==='needed'?'all':'needed'; save(); render(); };
-  $('#soundT').onclick=()=>{ state.sound=!state.sound; if(!state.sound) hush(); save(); render(); };
-  stage.querySelectorAll('[data-per]').forEach(b=>b.onclick=()=>{ state.perRound=+b.dataset.per; if(sess) sess.limit=state.perRound; save(); render(); });
-  $('#copy').onclick=()=>{ const txt=progressText(); const done=()=>{ $('#copied').textContent='Copied.'; };
-    try{ navigator.clipboard.writeText(txt).then(done,()=>showBox(txt)); }catch(e){ showBox(txt); } };
-  $('#bkCopy').onclick=async()=>{ $('#bkMsg').textContent='Getting every name’s progress…'; const txt=await backupCode();
-    const done=()=>{ $('#bkMsg').textContent='Copied. Keep it somewhere safe, like an email to yourself.'; };
-    try{ navigator.clipboard.writeText(txt).then(done,()=>bkShow(txt)); }catch(e){ bkShow(txt); } };
-  const bkm=$('#bkMove'); if(bkm) bkm.onclick=async()=>{ $('#bkMsg').textContent='Getting every name’s progress…'; const txt=await backupCode();
-    $('#bkBox').innerHTML=`<a class="big" style="text-decoration:none;display:inline-block" target="_blank" rel="noopener" href="https://deklerkdan.github.io/word-moon/#restore=${encodeURIComponent(txt)}">Open the website with this progress ↗</a>`;
-    $('#bkMsg').textContent='Tap the button. On the website, tap the Backup button again to confirm.'; };
-  const bkp=$('#bkPaste'); if(bkp) bkp.onclick=async()=>{ try{ const t=await navigator.clipboard.readText(); if(t){ $('#bkIn').value=t; $('#bkLoad').click(); } }catch(e){ $('#bkMsg').textContent='Press and hold in the box below, then tap Paste.'; $('#bkIn').focus(); } };
-  if(restoreArmed) $('#bkIn').value=restoreArmed.code;
-  $('#bkLoad').onclick=async()=>{ const code=$('#bkIn').value; const d=await readBackup(code);
-    if(!d){ restoreArmed=null; render(); $('#bkIn').value=code; const n=String(code||'').replace(/\s+/g,'').length;
-      $('#bkMsg').textContent=n?`That isn’t a whole Word Moon backup code (${n} characters came through; it may have been cut short). Copy the whole code and try again.`:'Nothing was pasted. Press and hold in the box, then tap Paste.'; return; }
-    if(!restoreArmed || restoreArmed.code!==code){ const same=d.players.filter(p=>players.some(x=>x.name.toLowerCase()===String(p.name).toLowerCase())).map(p=>p.name);
-      restoreArmed={code, msg: same.length?'Tap again: replaces progress for '+same.join(', '):'Tap again to add '+d.players.map(p=>p.name).join(', ')}; render(); return; }
-    restoreArmed=null; const n=loadBackup(d); render(); $('#bkMsg').textContent='Loaded '+n+' name'+(n===1?'':'s')+'.'; };
-  $('#reset').onclick=()=>{ if(!resetArmed){ resetArmed=true; render(); return; }
-    const keep={voice:state.voice,rate:state.rate,sound:state.sound,perRound:state.perRound,deviceVoice:state.deviceVoice};
-    state=Object.assign(blank(),keep); resetArmed=false; cur=null; sess=null; save(); render(); };
-  $('#back').onclick=closeGrown;
-  stage.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{ const id=b.dataset.rm; if(whoArmed!==id){ whoArmed=id; render(); return; } whoArmed=null; removePlayer(id); });
+  let body='';
+  if(grownTab==='voice'){
+    const voices=['buttery','airy','glassy','rounded'];
+    const dvList=deviceVoices().filter(v=>voiceScore(v)>-50).slice(0,6);
+    const voiceHTML = tts && !ttsBlocked
+      ? `<p>${esc(voiceNote())}</p><div class="row">${voices.map(v=>`<button class="pill" type="button" data-voice="${v}" aria-pressed="${state.voice===v}">${cap(v)}</button><button class="small" type="button" data-try="${v}">Try</button>`).join('')}</div>`
+      : `<p>${esc(voiceNote())}</p>${ttsSettled&&!ttsBlocked&&dvList.length?`<p>Pick the voice that sounds best (tap to hear it):</p><div class="row">${dvList.map((v,i)=>`<button class="pill" type="button" data-dv="${i}" aria-pressed="${bVoice===v}">${esc(v.name.replace(/^Microsoft |^Google /,'').replace(/ - .*$/,''))}</button>`).join('')}</div>`:''}${STANDALONE?betterVoiceTips():''}`;
+    body=`<div class="panel">${voiceHTML}
+      <label class="row"><span style="color:var(--muted);font-size:15px">Speed</span><input type="range" id="rate" min="0.7" max="1.2" step="0.05" value="${state.rate}"></label>
+      <div class="row">${Object.keys(SNDS).map(k=>`<button class="pill" type="button" data-snd="${k}" aria-pressed="${sndMode()===k}">${SNDS[k].i} ${SNDS[k].t}</button>`).join('')}</div></div>`;
+    stage.innerHTML=grownShell(body);
+    stage.querySelectorAll('[data-voice]').forEach(b=>b.onclick=()=>{ state.voice=b.dataset.voice; save(); render(); });
+    stage.querySelectorAll('[data-try]').forEach(b=>b.onclick=()=>say(['Hi! I’m Luna. Can you read this word?'],{voice:b.dataset.try,noRemember:true,need:true}));
+    stage.querySelectorAll('[data-dv]').forEach(b=>b.onclick=()=>{ const v=dvList[+b.dataset.dv]; if(!v) return; bVoice=v; state.deviceVoice=v.name; save(); render(); browserSay(['Hi! I’m Luna. Can you read this word?']); });
+    stage.querySelectorAll('[data-snd]').forEach(b=>b.onclick=()=>{ const k=b.dataset.snd; state.sound=k!=='never'; state.readMode=k==='asked'?'needed':'all'; if(!state.sound) hush(); save(); render(); });
+    on('rate',ev=>{ state.rate=+ev.target.value; save(); say(['This is my new speed.'],{noRemember:true,need:true}); },'onchange');
+  }
+  if(grownTab==='words'){
+    body=`<div class="panel"><h3>Words in a round</h3><div class="row">${[8,12,16,24].map(n=>`<button class="pill" type="button" data-per="${n}" aria-pressed="${state.perRound===n}">${n}</button>`).join('')}</div>
+      <p>✓ is trusted. ≈ and a right colour dot get a check-up later. 🌕 banks the word for good.</p>
+      <p>${PILES.map((p,i)=>`${p.m} ${c[i]}`).join(' · ')} · ${AW().length} words in the game</p>
+      <div class="row"><button class="pill" type="button" id="copy">Copy progress</button><span id="copied" style="color:var(--muted);font-size:14px"></span></div><div id="copyBox"></div>
+      <div class="row"><button class="pill danger" type="button" id="reset">${resetArmed?'Tap again to wipe all words':'Wipe all progress'}</button></div></div>`;
+    stage.innerHTML=grownShell(body);
+    stage.querySelectorAll('[data-per]').forEach(b=>b.onclick=()=>{ state.perRound=+b.dataset.per; if(sess) sess.limit=state.perRound; save(); render(); });
+    on('copy',()=>{ const txt=progressText(); const done=()=>{ $('#copied').textContent='Copied.'; };
+      try{ navigator.clipboard.writeText(txt).then(done,()=>showBox(txt)); }catch(e){ showBox(txt); } });
+    on('reset',()=>{ if(!resetArmed){ resetArmed=true; render(); return; }
+      const keep={voice:state.voice,rate:state.rate,sound:state.sound,readMode:state.readMode,perRound:state.perRound,deviceVoice:state.deviceVoice};
+      state=Object.assign(blank(),keep); resetArmed=false; cur=null; sess=null; save(); render(); });
+  }
+  if(grownTab==='backup'){
+    body=`<div class="panel"><p>A backup code holds every name’s progress. Use it to keep progress safe or move it to another phone.</p>
+      <div class="row"><button class="pill" type="button" id="bkCopy">Copy backup code</button>${STANDALONE?'<button class="pill" type="button" id="bkPaste">📋 Paste backup code</button>':'<button class="pill" type="button" id="bkMove">🚀 Move to the Word Moon website</button>'}</div>
+      <span id="bkMsg" style="color:var(--muted);font-size:14px"></span><div id="bkBox"></div>
+      <textarea id="bkIn" placeholder="Paste a backup code here" aria-label="Backup code to load" style="min-height:56px"></textarea>
+      <div class="row"><button class="pill${restoreArmed?' danger':''}" type="button" id="bkLoad">${restoreArmed?esc(restoreArmed.msg):'Load backup'}</button></div></div>`;
+    stage.innerHTML=grownShell(body);
+    on('bkCopy',async()=>{ $('#bkMsg').textContent='Getting every name’s progress…'; const txt=await backupCode();
+      const done=()=>{ $('#bkMsg').textContent='Copied. Keep it somewhere safe, like an email to yourself.'; };
+      try{ navigator.clipboard.writeText(txt).then(done,()=>bkShow(txt)); }catch(e){ bkShow(txt); } });
+    on('bkMove',async()=>{ $('#bkMsg').textContent='Getting every name’s progress…'; const txt=await backupCode();
+      $('#bkBox').innerHTML=`<a class="big" style="text-decoration:none;display:inline-block" target="_blank" rel="noopener" href="https://deklerkdan.github.io/word-moon/#restore=${encodeURIComponent(txt)}">Open the website with this progress ↗</a>`;
+      $('#bkMsg').textContent='Tap the button. On the website, tap Load backup again to confirm.'; });
+    on('bkPaste',async()=>{ try{ const t=await navigator.clipboard.readText(); if(t){ $('#bkIn').value=t; $('#bkLoad').click(); } }catch(e){ $('#bkMsg').textContent='Press and hold in the box below, then tap Paste.'; $('#bkIn').focus(); } });
+    if(restoreArmed) $('#bkIn').value=restoreArmed.code;
+    on('bkLoad',async()=>{ const code=$('#bkIn').value; const d=await readBackup(code);
+      if(!d){ restoreArmed=null; render(); $('#bkIn').value=code; const n=String(code||'').replace(/\s+/g,'').length;
+        $('#bkMsg').textContent=n?`That isn’t a whole Word Moon backup code (${n} characters came through; it may have been cut short). Copy the whole code and try again.`:'Nothing was pasted. Press and hold in the box, then tap Paste.'; return; }
+      if(!restoreArmed || restoreArmed.code!==code){ const same=d.players.filter(p=>players.some(x=>x.name.toLowerCase()===String(p.name).toLowerCase())).map(p=>p.name);
+        restoreArmed={code, msg: same.length?'Tap again: replaces progress for '+same.join(', '):'Tap again to add '+d.players.map(p=>p.name).join(', ')}; render(); return; }
+      restoreArmed=null; const n=loadBackup(d); render(); $('#bkMsg').textContent='Loaded '+n+' name'+(n===1?'':'s')+'.'; });
+  }
+  if(grownTab==='names'){
+    body=`<div class="panel"><p>Playing now: <b>${esc(playerName())}</b>. Each name keeps its own progress.</p>
+      <div class="row">${players.filter(p=>p.id!==who).map(p=>`<button class="pill" type="button" data-play="${esc(p.id)}">🐺 Play as ${esc(p.name)}</button>`).join('')}<button class="pill" type="button" id="addName">+ Add a name</button></div>
+      <div class="row">${players.map(p=>`<button class="pill${whoArmed===p.id?' danger':''}" type="button" data-rm="${esc(p.id)}">${whoArmed===p.id?'Tap again to remove '+esc(p.name):'Remove '+esc(p.name)}</button>`).join('')}</div></div>`;
+    stage.innerHTML=grownShell(body);
+    stage.querySelectorAll('[data-play]').forEach(b=>b.onclick=()=>{ afterGrown=null; choosePlayer(b.dataset.play); });
+    on('addName',()=>{ afterGrown=null; view='who'; render(); });
+    stage.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{ const id=b.dataset.rm; if(whoArmed!==id){ whoArmed=id; render(); return; } whoArmed=null; afterGrown=null; removePlayer(id); });
+  }
+  stage.querySelectorAll('[data-gtab]').forEach(b=>b.onclick=()=>{ grownTab=b.dataset.gtab; resetArmed=false; whoArmed=null; render(); });
 }
+function grownShell(body){ return `<section class="grownwrap"><div class="gtabs">${GTABS.map(([k,t])=>`<button class="pill" type="button" data-gtab="${k}" aria-pressed="${grownTab===k}">${t}</button>`).join('')}</div>${body}</section>`; }
 /* How to get a nicer voice on each kind of device (the standalone site only has the device's own voices). */
 function betterVoiceTips(){
   const ua=navigator.userAgent||'';
@@ -4497,21 +4555,226 @@ function progressText(){
   [3,2,1].forEach(i=>{ const l=AW().filter(e=>phaseOf(e.w)===i).map(e=>{ const r=state.words[e.w]; return e.w+(i===1?(r.read?' (reads)':' (knows)'):''); }); if(l.length) lines.push(PILES[i].n+': '+l.join(', ')); });
   return lines.join('\n');
 }
-function openGrown(){ clearTimers(); hush(); afterGrown={view}; resetArmed=false; view='grown'; render(); window.scrollTo(0,0); }
+function openGrown(){ clearTimers(); hush(); if(view!=='grown') afterGrown={view}; resetArmed=false; whoArmed=null; view='grown'; render(); }
 function resumeWord(){ /* carry on with a fresh step for the same word */
   view='word'; const r=rec(cur.w);
-  const step = sess.mode==='spell' ? (r.spell?null:'spell') : cur.full ? (cur.step||'readcheck') : !r.read ? 'readcheck' : !r.know ? 'know' : !r.spell ? 'spell' : null;
-  if(step==='readtest'||step==='knowcheck'||step==='explain') return goStep(step==='readtest'?'readcheck':'know');
+  if(cur.rreview) return goStep('readcheck');
+  if(cur.mreview) return goStep('know');
+  if(cur.review) return goStep('spell');
+  if(sess.mode==='spell') return r.spell ? nextOne() : goStep('spell');
+  const back={readtest:'readcheck',heard:'readcheck',explain:'know'};
+  const step = cur.full ? (back[cur.step]||cur.step||'readcheck') : !r.read ? 'readcheck' : !r.know ? 'know' : !r.spell ? 'spell' : null;
   if(step) goStep(step); else nextOne();
 }
 function closeGrown(){
-  const a=afterGrown||{view:'start'}; afterGrown=null;
+  const a=afterGrown||{view:'hub'}; afterGrown=null; resetArmed=false; whoArmed=null;
   if(a.view==='word' && sess && cur) return resumeWord();
-  if(a.view==='cloud' && sess && cur && cur.cloud){ view='cloud'; return render(); }
-  if(a.view==='end' && sess){ view='end'; render(); return; }
-  if(a.view==='words'){ view='words'; render(); return; }
-  if(a.view==='badges'||a.view==='lesson'){ view=a.view==='lesson'&&cur&&cur.lesson?'lesson':'badges'; render(); return; }
-  view=who?'start':'who'; render();
+  view=(a.view && a.view!=='grown') ? a.view : 'hub';
+  if((view==='cloud' && !(cur&&cur.cloud)) || (view==='phrase' && !(cur&&cur.phrase)) || view==='word') view='start';
+  render();
+}
+
+/* =================== Quiz: true or false ===================
+   gk.txt: topic|T or F|question|fact. A round is 10 questions: new ones first, then ones she got wrong, then the oldest.
+   Luna reads the question. Tap the moon to hear it again. Swipe up for yes / true, down for no / false. */
+const GKRAW=`# Quiz: true or false, for an 8-year-old in New Zealand. One per line: topic|T or F|question|fact
+# Topics: animals, space, earth, body, history, nz. No backticks, dollar signs, backslashes or | inside the text.
+animals|T|A spider has eight legs.|Spiders have eight legs. Insects have six.
+animals|F|A spider is an insect.|Spiders are not insects. They are arachnids, like scorpions.
+animals|T|Wolves live and hunt in groups called packs.|A wolf pack is usually a family: parents and their pups.
+animals|F|Bats are birds.|Bats are mammals. They are the only mammals that can really fly.
+animals|T|A whale is a mammal.|Whales breathe air and feed their babies milk, just like other mammals.
+animals|F|Fish breathe air through their noses.|Fish take oxygen from the water through their gills.
+animals|T|An octopus has eight arms.|Octopus means eight feet. Each arm is covered in suckers.
+animals|T|A frog starts life as a tadpole.|Tadpoles live in water and slowly grow legs and lose their tails.
+animals|F|Penguins can fly.|Penguins can't fly in the air, but they are amazing swimmers.
+animals|T|A cheetah is the fastest animal on land.|A cheetah can run as fast as a car on the motorway, but only for a short time.
+animals|F|Snakes have legs.|Snakes have no legs. They move by bending their long bodies.
+animals|T|Butterflies start life as caterpillars.|A caterpillar makes a chrysalis, and a butterfly comes out.
+animals|F|A baby kangaroo is called a cub.|A baby kangaroo is called a joey. It grows in its mother's pouch.
+animals|T|Bees make honey.|Bees make honey from the nectar of flowers.
+animals|F|Owls only come out during the day.|Most owls hunt at night. They have big eyes to see in the dark.
+animals|T|Elephants are the biggest animals on land.|An African elephant can weigh as much as four cars.
+animals|F|The blue whale is a small fish.|The blue whale is the biggest animal that has ever lived, and it is not a fish.
+animals|T|A group of fish swimming together is called a school.|Fish swim in schools to help keep safe from hunters.
+animals|F|Wolves howl to tell the moon hello.|Wolves howl to talk to their pack, not to the moon.
+animals|T|Some animals sleep all winter.|This long winter sleep is called hibernation.
+animals|T|Sharks have lived on Earth longer than trees.|Sharks have been around for more than 400 million years.
+animals|F|Insects have eight legs.|Insects have six legs and three body parts.
+animals|T|A chameleon can change its colour.|Chameleons change colour to show how they feel and to warm up or cool down.
+animals|F|Horses sleep only lying down.|Horses can sleep standing up. Their legs lock so they don't fall.
+space|T|The Earth goes around the Sun.|It takes the Earth one year to go all the way around the Sun.
+space|F|The Sun goes around the Earth.|It's the other way around: the Earth goes around the Sun.
+space|T|The Moon goes around the Earth.|The Moon takes about a month to go around the Earth once.
+space|F|The Moon makes its own light.|The Moon shines because sunlight bounces off it.
+space|T|The Sun is a star.|The Sun is a star. It looks big because it is the closest star to us.
+space|F|Stars are tiny, much smaller than the Earth.|Most stars are huge. They only look small because they are very far away.
+space|T|There are eight planets in our solar system.|Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus and Neptune.
+space|T|Jupiter is the biggest planet.|More than a thousand Earths could fit inside Jupiter.
+space|F|Mars is called the Blue Planet.|Mars is the Red Planet. Earth is sometimes called the Blue Planet.
+space|T|Saturn has rings around it.|Saturn's rings are made of ice and rock.
+space|F|People have walked on Mars.|People have walked on the Moon, but not on Mars yet. Robots have driven on Mars.
+space|T|People have walked on the Moon.|The first people walked on the Moon in 1969.
+space|F|The Moon is made of cheese.|The Moon is made of rock and dust.
+space|T|Mercury is the closest planet to the Sun.|Mercury is small and very hot in the day.
+space|F|In space you can hear sounds easily.|Space has no air, so sound can't travel there.
+space|T|A day is how long the Earth takes to spin around once.|The Earth spins once every 24 hours. That gives us day and night.
+space|F|It is night everywhere on Earth at the same time.|When it is night in New Zealand, it is day on the other side of the world.
+space|T|Astronauts float inside a space station.|They float because they are falling around the Earth all the time.
+space|F|The Sun is cold.|The Sun is extremely hot. Never look straight at it.
+space|T|Venus is the hottest planet.|Venus has thick clouds that trap heat, so it is even hotter than Mercury.
+space|F|The Moon looks the same shape every night.|The Moon seems to change shape: new moon, crescent, half moon and full moon.
+space|T|A full moon looks like a whole round circle.|At full moon, the side facing us is all lit up by the Sun.
+space|T|A shooting star is really a piece of space rock burning up.|It glows as it rushes through the air high above us.
+earth|T|Most of the Earth is covered by water.|About seven tenths of the Earth is covered by oceans.
+earth|F|The Pacific Ocean is the smallest ocean.|The Pacific is the biggest ocean in the world. New Zealand is in it.
+earth|T|A volcano can shoot out hot melted rock.|Melted rock is called lava when it comes out of a volcano.
+earth|F|Mount Everest is the smallest mountain in the world.|Mount Everest is the tallest mountain above the sea in the world.
+earth|T|Water freezes into ice when it gets very cold.|Water freezes at zero degrees Celsius.
+earth|F|Rain falls from the ground up to the sky.|Rain falls down from clouds. The Sun lifts water up into the sky as invisible vapour.
+earth|T|Plants need sunlight to grow.|Plants use sunlight to make their own food.
+earth|F|Deserts get lots of rain.|Deserts get very little rain. Some are hot, and some are cold.
+earth|T|Antarctica is the coldest place on Earth.|Antarctica is covered in thick ice all year.
+earth|F|There are ten continents.|There are seven continents: Africa, Antarctica, Asia, Australia, Europe, North America and South America.
+earth|T|A rainbow can appear when the Sun shines through rain.|Raindrops split sunlight into all its colours.
+earth|F|Thunder comes before lightning.|Lightning comes first. We hear thunder later because sound travels slower than light.
+earth|T|Trees give us oxygen to breathe.|Trees and plants take in carbon dioxide and give out oxygen.
+earth|F|Earthquakes only happen in the sea.|Earthquakes happen on land and under the sea, when the ground suddenly moves.
+earth|T|The Nile is one of the longest rivers in the world.|The Nile flows through Africa into the Mediterranean Sea.
+earth|F|The sea is fresh water you can drink.|Sea water is salty. Drinking it makes you thirstier.
+earth|T|Clouds are made of tiny drops of water.|When lots of drops join together, they fall as rain.
+earth|F|Snow is warm.|Snow is frozen water, so it is cold.
+earth|T|Wind is moving air.|Wind happens when air moves from one place to another.
+earth|T|The Amazon is a huge rainforest.|The Amazon rainforest in South America is home to millions of kinds of living things.
+earth|F|Diamonds are soft.|Diamonds are the hardest natural thing on Earth.
+earth|T|Magnets can pull things made of iron.|A magnet pulls iron and steel, but not wood or plastic.
+earth|F|A seed needs to be in the dark freezer to grow.|A seed needs water, warmth and soil to start growing.
+body|T|Your heart pumps blood around your body.|Your heart beats about a hundred thousand times a day.
+body|F|Your brain is in your tummy.|Your brain is inside your head, protected by your skull.
+body|T|You have more than 200 bones in your body.|A grown-up has 206 bones. Babies have even more, and some join up as they grow.
+body|F|Your teeth are made of wood.|Teeth are covered in enamel, the hardest thing in your body.
+body|T|Your lungs help you breathe.|Your lungs take in air, and your blood carries the oxygen around your body.
+body|F|You have five hands.|You have two hands, with five fingers on each.
+body|T|You have five senses.|Sight, hearing, smell, taste and touch.
+body|F|You taste food with your ears.|You taste food with your tongue, and your nose helps too.
+body|T|Your skin is the biggest part of your body.|Skin covers your whole body and keeps germs out.
+body|F|Sleep is not important for children.|Sleep helps your body grow and your brain remember what you learned.
+body|T|Drinking water is good for your body.|Your body is more than half water.
+body|T|Your muscles help you move.|Muscles pull on your bones to move them.
+body|F|Your eyes can see in complete darkness.|Eyes need light to see. In complete darkness we can't see anything.
+body|T|Washing your hands helps stop germs.|Soap and water wash germs off your hands.
+body|T|Your heart is a muscle.|It is a very strong muscle that never stops working.
+body|F|Babies have no bones at all.|Babies have bones. They actually have more than grown-ups.
+body|T|Your fingerprints are different from everyone else's.|Even twins have different fingerprints.
+body|F|Your blood is blue inside your body.|Your blood is always red. Veins can look blue through your skin.
+body|T|Your nose can tell thousands of different smells apart.|Smell also helps you taste your food.
+body|F|Sugar is good for your teeth.|Sugar helps germs damage your teeth. Brush twice a day.
+body|T|Your bones are alive and growing.|Bones grow and can even mend themselves when they break.
+history|T|The ancient Egyptians built the pyramids.|The Great Pyramid was built more than 4,000 years ago.
+history|F|Dinosaurs and people lived at the same time.|Dinosaurs died out about 66 million years before the first people.
+history|T|The Romans built long straight roads.|Some Roman roads are still used today, about 2,000 years later.
+history|F|Knights lived in spaceships.|Knights lived in the Middle Ages, long before spaceships. Many lived in castles.
+history|T|People used to write with feathers dipped in ink.|A feather pen is called a quill.
+history|F|Cars were invented before the wheel.|The wheel was invented thousands of years before cars.
+history|T|The Vikings sailed in long wooden boats.|Viking longships could sail on the sea and up rivers.
+history|F|The first aeroplane flight lasted a whole day.|The first powered plane flight in 1903 lasted only 12 seconds.
+history|T|Ancient Greeks held the first Olympic Games.|The first Olympics were held in Olympia, Greece, almost 3,000 years ago.
+history|F|Mobile phones are thousands of years old.|The first mobile phones were made about fifty years ago.
+history|T|The ancient Egyptians wrote with pictures called hieroglyphs.|Hieroglyphs used little pictures for sounds and ideas.
+history|F|Castles were built out of paper.|Castles were built from stone so they were strong.
+history|T|Long ago, people lit their homes with candles and lamps.|Electric light bulbs only became common about a hundred years ago.
+history|T|Russia is the biggest country in the world.|Russia is so wide that it covers eleven time zones.
+history|F|Christopher Columbus sailed to the Moon.|Columbus sailed across the Atlantic Ocean in 1492.
+history|T|People once lived in caves and painted on the walls.|Some cave paintings are more than 30,000 years old.
+history|F|The Great Wall of China is very short.|The Great Wall of China is thousands of kilometres long.
+history|T|Before fridges, people kept food cold with ice.|Ice was cut from frozen lakes and stored in ice houses.
+history|F|Ancient Romans watched television.|There was no television until about a hundred years ago.
+history|T|Some kings and queens wore crowns.|A crown showed that a person was a ruler.
+history|F|The printing press was invented last year.|The printing press was invented almost 600 years ago, so books could be made faster.
+history|T|Mummies were made in ancient Egypt.|The Egyptians wrapped bodies in cloth to keep them for the afterlife.
+nz|T|The kiwi is a bird that cannot fly.|The kiwi is New Zealand's national bird. It hunts for food at night.
+nz|F|New Zealand has snakes living in the wild.|New Zealand has no wild land snakes.
+nz|T|Aotearoa is the Māori name for New Zealand.|Many people say Aotearoa means land of the long white cloud.
+nz|F|New Zealand is one big island.|New Zealand has two main islands, the North Island and the South Island, and many small ones.
+nz|T|Wellington is the capital city of New Zealand.|Parliament is in Wellington, next to a building called the Beehive.
+nz|F|Auckland is the capital of New Zealand.|Auckland is the biggest city, but Wellington is the capital.
+nz|T|Aoraki Mount Cook is the highest mountain in New Zealand.|Aoraki is in the Southern Alps in the South Island.
+nz|T|The moa was a giant bird that lived in New Zealand.|Some moa were taller than a grown-up. They died out hundreds of years ago.
+nz|F|The tuatara is a kind of frog.|The tuatara is a reptile found only in New Zealand. Its family goes back to the time of the dinosaurs.
+nz|T|Māori were the first people to live in New Zealand.|Māori sailed to New Zealand in waka hourua, double-hulled canoes, from Polynesia.
+nz|F|It snows in New Zealand at Christmas every year.|Christmas is in summer in New Zealand. Lots of people go to the beach.
+nz|T|Ruapehu is a volcano.|Mount Ruapehu is an active volcano in the North Island. People ski on it in winter.
+nz|F|Kangaroos live wild in New Zealand.|Kangaroos live wild in Australia, not New Zealand.
+nz|T|The pōhutukawa is called New Zealand's Christmas tree.|It has bright red flowers around Christmas time.
+nz|F|The silver fern grows only in Australia.|The silver fern is a New Zealand plant, and a symbol of the country.
+nz|T|The All Blacks are New Zealand's rugby team.|They do the haka before their games.
+nz|T|Rotorua has bubbling mud pools and geysers.|The ground there is heated by volcanoes deep below.
+nz|F|The kea is a parrot that lives in the hot desert.|The kea is a clever parrot that lives in the snowy mountains of the South Island.
+nz|T|Lake Taupō is the biggest lake in New Zealand.|Lake Taupō is in the middle of the North Island and was made by a huge volcano.
+nz|F|The Treaty of Waitangi was signed in the year 2000.|The Treaty of Waitangi was signed in 1840.
+nz|T|The tūī can make lots of different sounds.|Tūī can click, whistle and even copy other sounds.
+nz|F|New Zealand is in the Northern Hemisphere.|New Zealand is in the Southern Hemisphere, far south of the equator.
+nz|T|The Cook Strait is between the North Island and the South Island.|Ferries cross Cook Strait between Wellington and Picton.
+nz|T|Matariki is the Māori New Year.|Matariki is a group of stars. It rises in winter, and it is a public holiday.`;
+const GKT={animals:{e:'🐾',n:'Animals'},space:{e:'🚀',n:'Space'},earth:{e:'🌏',n:'Earth'},body:{e:'🦴',n:'Body'},history:{e:'🏛️',n:'History'},nz:{e:'🥝',n:'New Zealand'}};
+const GKQ=GKRAW.split(String.fromCharCode(10)).map(l=>l.trim()).filter(l=>l&&l[0]!=='#').map(l=>{ const f=l.split('|'); return {topic:f[0], yes:f[1]==='T', q:f[2], fact:f[3]||'', id:(f[0]+'-'+(f[2]||'')).toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,70)}; }).filter(x=>x.q && GKT[x.topic]);
+const GK_ROUND=10;
+let gk=null;
+const gkSeen=()=>state.gk||(state.gk={q:{},rounds:0});
+function renderGkMain(){
+  const blk=k=>`<button class="blk" type="button" data-gkt="${k}"><span>${GKT[k].e}</span><b>${GKT[k].n}</b></button>`;
+  stage.innerHTML=`<section class="gmain">
+    ${wolfHTML}
+    <div class="blocks four"><button class="blk main" type="button" data-gkt=""><span>▶</span><b>Play</b></button>${['animals','space','earth'].map(blk).join('')}</div>
+    <div class="blocks three">${['body','history','nz'].map(blk).join('')}</div>
+  </section>`;
+  stage.querySelectorAll('[data-gkt]').forEach(b=>b.onclick=()=>startGk(b.dataset.gkt));
+}
+function pickGk(topic){
+  const seen=gkSeen().q, pool=GKQ.filter(x=>!topic||x.topic===topic);
+  const score=x=>{ const s=seen[x.id]; if(!s) return Math.random(); if((s.w||0)>(s.r||0)) return 1+Math.random(); return 2+(s.last||0)/1e14+Math.random()*0.01; };
+  return shuffle(pool.map(x=>({x,s:score(x)})).sort((a,b)=>a.s-b.s).slice(0,GK_ROUND).map(o=>o.x));
+}
+function startGk(topic){
+  hush(); const list=pickGk(topic); if(!list.length) return;
+  gk={topic, list, i:0, right:0, answered:false}; view='gkplay'; render(); gkAsk(true);
+}
+function gkAsk(first){ const Q=gk.list[gk.i]; say((first?['True or false? Swipe up for yes. Swipe down for no.',{pause:500}]:[]).concat([Q.q])); }
+function renderGkPlay(){
+  if(!gk){ view='gk'; return render(); }
+  const Q=gk.list[gk.i], a=gk.answered;
+  stage.innerHTML=`<section class="gkplay" id="gkArea">
+    <button class="gkhint up" type="button" id="gkYes" style="${a?'visibility:hidden':''}">▲ Yes / True</button>
+    <p class="gkq">${esc(Q.q)}</p>
+    <button class="gkmoon" type="button" id="gkMoon" aria-label="Hear it again">${a?(gk.ok?'✓':'✗'):''}</button>
+    ${a?`<div class="gkfb pop"><p class="say ${gk.ok?'good':'try'}">${gk.ok?'That’s right!':'Not quite: it’s '+(Q.yes?'true':'false')+'.'}</p><p>${esc(Q.fact)}</p></div>${nextHTML}`
+      :`<button class="gkhint down" type="button" id="gkNo">▼ No / False</button>`}
+  </section>`;
+  const area=$('#gkArea'); let y0=null;
+  area.onpointerdown=e=>{ y0=e.clientY; };
+  area.onpointerup=e=>{ if(y0==null) return; const dy=e.clientY-y0; y0=null; if(Math.abs(dy)>45){ gk.swiped=Date.now(); gkSwipe(dy<0); } };
+  area.onpointercancel=()=>{ y0=null; };
+  const tap=fn=>()=>{ if(gk && Date.now()-(gk.swiped||0)<450) return; fn(); };
+  $('#gkMoon').onclick=tap(()=>{ if(gk.answered) say([Q.fact],{noRemember:true,need:true}); else say([Q.q],{noRemember:true,need:true}); });
+  const y=$('#gkYes'); if(y) y.onclick=tap(()=>gkSwipe(true));
+  const n=$('#gkNo'); if(n) n.onclick=tap(()=>gkSwipe(false));
+  const nb=$('#nextBtn'); if(nb) nb.onclick=tap(gkNext);
+}
+function gkSwipe(up){ if(!gk) return; if(gk.answered) return gkNext(); gkAnswer(up); }
+function gkAnswer(yes){
+  const Q=gk.list[gk.i], ok=(yes===Q.yes);
+  gk.answered=true; gk.ok=ok; if(ok) gk.right++;
+  const all=gkSeen().q, s=all[Q.id]||(all[Q.id]={r:0,w:0}); if(ok) s.r++; else s.w++; s.last=Date.now(); save();
+  hush(); chime(ok?'good':'try');
+  const m=$('#gkMoon'); if(m) m.classList.add(yes?'flyup':'flydown');
+  later(()=>{ if(view!=='gkplay'||!gk) return; render(); say([ok?pick(['That’s right!','Well done!','Yes!']):`Not quite. It’s ${Q.yes?'true':'false'}.`, {pause:300}, Q.fact],{noRemember:true}); },380);
+}
+function gkNext(){
+  if(!gk || !gk.answered) return;
+  clearTimers(); hush(); gk.i++; gk.answered=false;
+  if(gk.i>=gk.list.length){ const r=gk.right, n=gk.list.length; gkSeen().rounds=(gkSeen().rounds||0)+1; save(); gk=null; view='gk'; render();
+    chime('full'); toast(`🌍 You got ${r} of ${n}!`); say([`You got ${r} out of ${n}. Well done!`],{noRemember:true}); return; }
+  render(); gkAsk();
 }
 
 /* hold to open (stops her opening it by accident); Enter or Space also opens it */
@@ -4524,16 +4787,21 @@ function closeGrown(){
   b.addEventListener('click',e=>{ if(e.detail===0 && view!=='grown') openGrown(); });
   b.addEventListener('contextmenu',e=>e.preventDefault());
 })();
-$('#hearBtn').onclick=()=>{ if(!cur) return; if(cur.step==='readtest' && !cur.answered) sayOptions(); else if(lastLines.length) say(lastLines,{noRemember:true,need:true}); };
-$('#stopBtn').onclick=hush;
-$('#exitBtn').onclick=()=>{ hush(); clearTimers(); if(sess) finishRound(); else { view='start'; render(); } };
-$('#wordsBtn').onclick=()=>openWords(view);
+$('#backBtn').onclick=goBack;
+$('#sndBtn').onclick=cycleSnd;
 
-document.addEventListener('keydown',ev=>{ if(view==='words' && popWord && ev.key==='Escape'){ ev.preventDefault(); closePop(); } });
-/* keyboard: letters while spelling; Enter checks; 1-3 picks a dot */
+document.addEventListener('keydown',ev=>{ if(view==='pile' && popWord && ev.key==='Escape'){ ev.preventDefault(); closePop(); } });
+/* keyboard: letters while spelling; Enter checks; 1-3 picks a dot; ↑ ↓ in the quiz */
 document.addEventListener('keydown',ev=>{
-  if(view!=='word'||!cur||ev.ctrlKey||ev.metaKey||ev.altKey) return;
+  if(ev.ctrlKey||ev.metaKey||ev.altKey) return;
   if(ev.target && /INPUT|TEXTAREA/.test(ev.target.tagName)) return;
+  if(view==='gkplay' && gk){
+    if(ev.key==='ArrowUp'){ ev.preventDefault(); gkSwipe(true); }
+    else if(ev.key==='ArrowDown'){ ev.preventDefault(); gkSwipe(false); }
+    else if(ev.key==='Enter' && gk.answered){ ev.preventDefault(); gkNext(); }
+    return;
+  }
+  if(view!=='word'||!cur) return;
   if(cur.step==='spell' && cur.spellPhase==='type' && !cur.spellResult){
     if(ev.key==='Backspace'){ ev.preventDefault(); typeKey('back'); return; }
     if(ev.key==='Enter'){ ev.preventDefault(); checkSpell(); return; }
@@ -4560,9 +4828,9 @@ render();
 /* A move link (...#restore=<backup code>) opens Backup with the code ready, waiting for a tap to confirm.
    The part after # is never sent to the website's server; it stays on this phone, and is removed from the address at once. */
 if(STANDALONE){ try{ if(/^#restore=/.test(location.hash)){ const code=decodeURIComponent(location.hash.slice(9)); history.replaceState(null,'',location.pathname+location.search);
-  openGrown(); const t=$('#bkIn'); if(t){ t.value=code; $('#bkLoad').click(); setTimeout(()=>{ const b=$('#bkLoad'); if(b) b.scrollIntoView({block:'center'}); },500); } } }catch(e){} }
+  grownTab='backup'; openGrown(); const t=$('#bkIn'); if(t){ t.value=code; $('#bkLoad').click(); setTimeout(()=>{ const b=$('#bkLoad'); if(b) b.scrollIntoView({block:'center'}); },500); } } }catch(e){} }
 })();
 </script>
-<script>if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('sw.js?v=202611150059').catch(function(){});});}</script>
+<script>if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('sw.js?v=202611162203').catch(function(){});});}</script>
 </body>
 </html>
