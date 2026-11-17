@@ -110,7 +110,11 @@ main>section{flex:1;min-height:0}
 .gkhint.up{color:var(--good)} .gkhint.down{color:var(--no)}
 .gkq{font-family:var(--font-display);font-size:clamp(22px,min(6vw,4.2dvh),36px);line-height:1.25;max-width:24ch}
 .gkmoon{position:relative;width:min(44vw,22dvh);aspect-ratio:1;border-radius:50%;flex:none;background:radial-gradient(circle at 38% 34%,#FFF4C8 0%,var(--moon) 55%,#D9B24B 100%);box-shadow:0 0 50px 8px rgba(244,210,107,.18);transition:transform .35s ease,opacity .35s ease;display:grid;place-items:center;font-size:min(14vw,7dvh);color:#1B1606;font-weight:800}
-.gkmoon.flyup{transform:translateY(-30dvh) scale(.6);opacity:0} .gkmoon.flydown{transform:translateY(30dvh) scale(.6);opacity:0}
+.gkmoon.flyup{transform:translateY(-30dvh) scale(.6);opacity:0} .gkmoon.flydown{transform:translateY(30dvh) scale(.6);opacity:0} .gkmoon.flyright{transform:translateX(40vw) scale(.6);opacity:0}
+html.quizbg body{background:linear-gradient(180deg,#0E8A3C 0%,#0A5527 10%,#07080B 32%,#07080B 68%,#5E0D10 90%,#B3161C 100%)}
+.gkplay .gkhint{color:#fff;border-color:rgba(255,255,255,.7);background:rgba(0,0,0,.22)}
+.gkmid{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;width:100%;gap:8px}
+.gkskip{justify-self:start;font-family:var(--font-display);font-size:clamp(15px,3.8vw,19px);color:var(--ink);background:rgba(255,255,255,.08);border:2px dashed rgba(255,255,255,.55);border-radius:999px;padding:8px 12px;white-space:nowrap}
 .gkfb{display:flex;flex-direction:column;align-items:center;gap:8px;max-width:34ch}
 .gkfb .say{font-family:var(--font-display);font-size:30px} .gkfb .say.good{color:var(--good)} .gkfb .say.try{color:var(--try)}
 .gkfb p{font-size:clamp(17px,4.4vw,21px)}
@@ -2650,7 +2654,7 @@ function voiceNote(){
   if(!canBrowser) return 'This app can’t read aloud. Open the link in Chrome or Edge on a computer, or in your phone’s web browser.';
   return 'Luna is using this device’s voice'+(bVoice?' ('+bVoice.name.replace(/^Microsoft |^Google /,'').replace(/ - .*$/,'')+')':'')+'. Claude’s voice works in Chrome or Edge on a computer.';
 }
-function browserSay(lines){
+function browserSay(lines, slow){
   if(!canBrowser){ soundTrouble='none'; showTrouble(); return Promise.resolve(); }
   return new Promise(res=>{
     let started=false;
@@ -2660,7 +2664,7 @@ function browserSay(lines){
       if(speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel();
       try{ speechSynthesis.resume(); }catch(e){}
       lines.forEach((tx,i)=>{ const u=new SpeechSynthesisUtterance(tx); if(bVoice){u.voice=bVoice;u.lang=bVoice.lang;} else u.lang='en-US';
-        u.rate=0.9*state.rate/0.95; u.pitch=1.05;
+        u.rate=0.9*state.rate/0.95*(slow||1); u.pitch=1.05;
         if(i===0) u.onstart=()=>{ started=true; heardOnce=true; if(soundTrouble==='silent'){ soundTrouble=''; showTrouble(); } browserSpeaking=true; updateStop(); };
         if(i===lines.length-1) u.onend=u.onerror=()=>{browserSpeaking=false;updateStop();res();};
         speechSynthesis.speak(u); });
@@ -2693,17 +2697,17 @@ async function say(items, opts){
 async function speakLines(lines, opts){
   if(!ttsSettled){ await Promise.race([ttsReady, wait(1500)]); }
   if(tts && !ttsBlocked){
-    try{ await tts.speak(lines.map(text=>({text, voice:opts.voice||state.voice})), {language:'en', rate:state.rate}); heardOnce=true; if(soundTrouble){ soundTrouble=''; showTrouble(); } }
+    try{ await tts.speak(lines.map(text=>({text, voice:opts.voice||state.voice})), {language:'en', rate:state.rate*(opts.slow||1)}); heardOnce=true; if(soundTrouble){ soundTrouble=''; showTrouble(); } }
     catch(err){
       const c=err&&err.code;
       if(c==='not_granted'){ ttsBlocked=true; soundTrouble='off'; showTrouble(); }
       else if(c==='no_gesture'){ const h=$('#hearBtn'); if(h&&h.animate) h.animate([{transform:'scale(1)'},{transform:'scale(1.25)'},{transform:'scale(1)'}],{duration:500,iterations:2}); }
       else if(c==='stopped'){ /* replaced or stopped on purpose */ }
-      else { await browserSay(lines); }
+      else { await browserSay(lines, opts.slow); }
     }
     return;
   }
-  if(!ttsBlocked) await browserSay(lines);
+  if(!ttsBlocked) await browserSay(lines, opts.slow);
 }
 function hush(){ sayToken++; try{ tts && tts.stop().catch(()=>{}); }catch(e){} try{ canBrowser && speechSynthesis.cancel(); }catch(e){} browserSpeaking=false; updateStop(); }
 function updateStop(){ const b=$('#stopBtn'); if(b) b.hidden = !(ttsState!=='idle' || browserSpeaking); }
@@ -3920,6 +3924,7 @@ function render(){
   if(view!=='game') stopGame();
   if(!who && view!=='grown') view='who';
   header();
+  document.documentElement.classList.toggle('quizbg', view==='gkplay');
   if(view==='who') return renderWho();
   if(view==='hub') return renderHub();
   if(view==='start') return renderStart();
@@ -4575,149 +4580,149 @@ function closeGrown(){
 }
 
 /* =================== Quiz: true or false ===================
-   gk.txt: topic|T or F|question|fact. A round is 10 questions: new ones first, then ones she got wrong, then the oldest.
+   gk.txt: topic|T or F|question|fact|question in other words. A round is 10 questions: new ones first, then ones she got wrong, then the oldest.
    Luna reads the question. Tap the moon to hear it again. Swipe up for yes / true, down for no / false. */
-const GKRAW=`# Quiz: true or false, for an 8-year-old in New Zealand. One per line: topic|T or F|question|fact
+const GKRAW=`# Quiz: true or false, for an 8-year-old in New Zealand. One per line: topic|T or F|question|fact|same question in other words (for the fifth tap)
 # Topics: animals, space, earth, body, history, nz. No backticks, dollar signs, backslashes or | inside the text.
-animals|T|A spider has eight legs.|Spiders have eight legs. Insects have six.
-animals|F|A spider is an insect.|Spiders are not insects. They are arachnids, like scorpions.
-animals|T|Wolves live and hunt in groups called packs.|A wolf pack is usually a family: parents and their pups.
-animals|F|Bats are birds.|Bats are mammals. They are the only mammals that can really fly.
-animals|T|A whale is a mammal.|Whales breathe air and feed their babies milk, just like other mammals.
-animals|F|Fish breathe air through their noses.|Fish take oxygen from the water through their gills.
-animals|T|An octopus has eight arms.|Octopus means eight feet. Each arm is covered in suckers.
-animals|T|A frog starts life as a tadpole.|Tadpoles live in water and slowly grow legs and lose their tails.
-animals|F|Penguins can fly.|Penguins can't fly in the air, but they are amazing swimmers.
-animals|T|A cheetah is the fastest animal on land.|A cheetah can run as fast as a car on the motorway, but only for a short time.
-animals|F|Snakes have legs.|Snakes have no legs. They move by bending their long bodies.
-animals|T|Butterflies start life as caterpillars.|A caterpillar makes a chrysalis, and a butterfly comes out.
-animals|F|A baby kangaroo is called a cub.|A baby kangaroo is called a joey. It grows in its mother's pouch.
-animals|T|Bees make honey.|Bees make honey from the nectar of flowers.
-animals|F|Owls only come out during the day.|Most owls hunt at night. They have big eyes to see in the dark.
-animals|T|Elephants are the biggest animals on land.|An African elephant can weigh as much as four cars.
-animals|F|The blue whale is a small fish.|The blue whale is the biggest animal that has ever lived, and it is not a fish.
-animals|T|A group of fish swimming together is called a school.|Fish swim in schools to help keep safe from hunters.
-animals|F|Wolves howl to tell the moon hello.|Wolves howl to talk to their pack, not to the moon.
-animals|T|Some animals sleep all winter.|This long winter sleep is called hibernation.
-animals|T|Sharks have lived on Earth longer than trees.|Sharks have been around for more than 400 million years.
-animals|F|Insects have eight legs.|Insects have six legs and three body parts.
-animals|T|A chameleon can change its colour.|Chameleons change colour to show how they feel and to warm up or cool down.
-animals|F|Horses sleep only lying down.|Horses can sleep standing up. Their legs lock so they don't fall.
-space|T|The Earth goes around the Sun.|It takes the Earth one year to go all the way around the Sun.
-space|F|The Sun goes around the Earth.|It's the other way around: the Earth goes around the Sun.
-space|T|The Moon goes around the Earth.|The Moon takes about a month to go around the Earth once.
-space|F|The Moon makes its own light.|The Moon shines because sunlight bounces off it.
-space|T|The Sun is a star.|The Sun is a star. It looks big because it is the closest star to us.
-space|F|Stars are tiny, much smaller than the Earth.|Most stars are huge. They only look small because they are very far away.
-space|T|There are eight planets in our solar system.|Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus and Neptune.
-space|T|Jupiter is the biggest planet.|More than a thousand Earths could fit inside Jupiter.
-space|F|Mars is called the Blue Planet.|Mars is the Red Planet. Earth is sometimes called the Blue Planet.
-space|T|Saturn has rings around it.|Saturn's rings are made of ice and rock.
-space|F|People have walked on Mars.|People have walked on the Moon, but not on Mars yet. Robots have driven on Mars.
-space|T|People have walked on the Moon.|The first people walked on the Moon in 1969.
-space|F|The Moon is made of cheese.|The Moon is made of rock and dust.
-space|T|Mercury is the closest planet to the Sun.|Mercury is small and very hot in the day.
-space|F|In space you can hear sounds easily.|Space has no air, so sound can't travel there.
-space|T|A day is how long the Earth takes to spin around once.|The Earth spins once every 24 hours. That gives us day and night.
-space|F|It is night everywhere on Earth at the same time.|When it is night in New Zealand, it is day on the other side of the world.
-space|T|Astronauts float inside a space station.|They float because they are falling around the Earth all the time.
-space|F|The Sun is cold.|The Sun is extremely hot. Never look straight at it.
-space|T|Venus is the hottest planet.|Venus has thick clouds that trap heat, so it is even hotter than Mercury.
-space|F|The Moon looks the same shape every night.|The Moon seems to change shape: new moon, crescent, half moon and full moon.
-space|T|A full moon looks like a whole round circle.|At full moon, the side facing us is all lit up by the Sun.
-space|T|A shooting star is really a piece of space rock burning up.|It glows as it rushes through the air high above us.
-earth|T|Most of the Earth is covered by water.|About seven tenths of the Earth is covered by oceans.
-earth|F|The Pacific Ocean is the smallest ocean.|The Pacific is the biggest ocean in the world. New Zealand is in it.
-earth|T|A volcano can shoot out hot melted rock.|Melted rock is called lava when it comes out of a volcano.
-earth|F|Mount Everest is the smallest mountain in the world.|Mount Everest is the tallest mountain above the sea in the world.
-earth|T|Water freezes into ice when it gets very cold.|Water freezes at zero degrees Celsius.
-earth|F|Rain falls from the ground up to the sky.|Rain falls down from clouds. The Sun lifts water up into the sky as invisible vapour.
-earth|T|Plants need sunlight to grow.|Plants use sunlight to make their own food.
-earth|F|Deserts get lots of rain.|Deserts get very little rain. Some are hot, and some are cold.
-earth|T|Antarctica is the coldest place on Earth.|Antarctica is covered in thick ice all year.
-earth|F|There are ten continents.|There are seven continents: Africa, Antarctica, Asia, Australia, Europe, North America and South America.
-earth|T|A rainbow can appear when the Sun shines through rain.|Raindrops split sunlight into all its colours.
-earth|F|Thunder comes before lightning.|Lightning comes first. We hear thunder later because sound travels slower than light.
-earth|T|Trees give us oxygen to breathe.|Trees and plants take in carbon dioxide and give out oxygen.
-earth|F|Earthquakes only happen in the sea.|Earthquakes happen on land and under the sea, when the ground suddenly moves.
-earth|T|The Nile is one of the longest rivers in the world.|The Nile flows through Africa into the Mediterranean Sea.
-earth|F|The sea is fresh water you can drink.|Sea water is salty. Drinking it makes you thirstier.
-earth|T|Clouds are made of tiny drops of water.|When lots of drops join together, they fall as rain.
-earth|F|Snow is warm.|Snow is frozen water, so it is cold.
-earth|T|Wind is moving air.|Wind happens when air moves from one place to another.
-earth|T|The Amazon is a huge rainforest.|The Amazon rainforest in South America is home to millions of kinds of living things.
-earth|F|Diamonds are soft.|Diamonds are the hardest natural thing on Earth.
-earth|T|Magnets can pull things made of iron.|A magnet pulls iron and steel, but not wood or plastic.
-earth|F|A seed needs to be in the dark freezer to grow.|A seed needs water, warmth and soil to start growing.
-body|T|Your heart pumps blood around your body.|Your heart beats about a hundred thousand times a day.
-body|F|Your brain is in your tummy.|Your brain is inside your head, protected by your skull.
-body|T|You have more than 200 bones in your body.|A grown-up has 206 bones. Babies have even more, and some join up as they grow.
-body|F|Your teeth are made of wood.|Teeth are covered in enamel, the hardest thing in your body.
-body|T|Your lungs help you breathe.|Your lungs take in air, and your blood carries the oxygen around your body.
-body|F|You have five hands.|You have two hands, with five fingers on each.
-body|T|You have five senses.|Sight, hearing, smell, taste and touch.
-body|F|You taste food with your ears.|You taste food with your tongue, and your nose helps too.
-body|T|Your skin is the biggest part of your body.|Skin covers your whole body and keeps germs out.
-body|F|Sleep is not important for children.|Sleep helps your body grow and your brain remember what you learned.
-body|T|Drinking water is good for your body.|Your body is more than half water.
-body|T|Your muscles help you move.|Muscles pull on your bones to move them.
-body|F|Your eyes can see in complete darkness.|Eyes need light to see. In complete darkness we can't see anything.
-body|T|Washing your hands helps stop germs.|Soap and water wash germs off your hands.
-body|T|Your heart is a muscle.|It is a very strong muscle that never stops working.
-body|F|Babies have no bones at all.|Babies have bones. They actually have more than grown-ups.
-body|T|Your fingerprints are different from everyone else's.|Even twins have different fingerprints.
-body|F|Your blood is blue inside your body.|Your blood is always red. Veins can look blue through your skin.
-body|T|Your nose can tell thousands of different smells apart.|Smell also helps you taste your food.
-body|F|Sugar is good for your teeth.|Sugar helps germs damage your teeth. Brush twice a day.
-body|T|Your bones are alive and growing.|Bones grow and can even mend themselves when they break.
-history|T|The ancient Egyptians built the pyramids.|The Great Pyramid was built more than 4,000 years ago.
-history|F|Dinosaurs and people lived at the same time.|Dinosaurs died out about 66 million years before the first people.
-history|T|The Romans built long straight roads.|Some Roman roads are still used today, about 2,000 years later.
-history|F|Knights lived in spaceships.|Knights lived in the Middle Ages, long before spaceships. Many lived in castles.
-history|T|People used to write with feathers dipped in ink.|A feather pen is called a quill.
-history|F|Cars were invented before the wheel.|The wheel was invented thousands of years before cars.
-history|T|The Vikings sailed in long wooden boats.|Viking longships could sail on the sea and up rivers.
-history|F|The first aeroplane flight lasted a whole day.|The first powered plane flight in 1903 lasted only 12 seconds.
-history|T|Ancient Greeks held the first Olympic Games.|The first Olympics were held in Olympia, Greece, almost 3,000 years ago.
-history|F|Mobile phones are thousands of years old.|The first mobile phones were made about fifty years ago.
-history|T|The ancient Egyptians wrote with pictures called hieroglyphs.|Hieroglyphs used little pictures for sounds and ideas.
-history|F|Castles were built out of paper.|Castles were built from stone so they were strong.
-history|T|Long ago, people lit their homes with candles and lamps.|Electric light bulbs only became common about a hundred years ago.
-history|T|Russia is the biggest country in the world.|Russia is so wide that it covers eleven time zones.
-history|F|Christopher Columbus sailed to the Moon.|Columbus sailed across the Atlantic Ocean in 1492.
-history|T|People once lived in caves and painted on the walls.|Some cave paintings are more than 30,000 years old.
-history|F|The Great Wall of China is very short.|The Great Wall of China is thousands of kilometres long.
-history|T|Before fridges, people kept food cold with ice.|Ice was cut from frozen lakes and stored in ice houses.
-history|F|Ancient Romans watched television.|There was no television until about a hundred years ago.
-history|T|Some kings and queens wore crowns.|A crown showed that a person was a ruler.
-history|F|The printing press was invented last year.|The printing press was invented almost 600 years ago, so books could be made faster.
-history|T|Mummies were made in ancient Egypt.|The Egyptians wrapped bodies in cloth to keep them for the afterlife.
-nz|T|The kiwi is a bird that cannot fly.|The kiwi is New Zealand's national bird. It hunts for food at night.
-nz|F|New Zealand has snakes living in the wild.|New Zealand has no wild land snakes.
-nz|T|Aotearoa is the Māori name for New Zealand.|Many people say Aotearoa means land of the long white cloud.
-nz|F|New Zealand is one big island.|New Zealand has two main islands, the North Island and the South Island, and many small ones.
-nz|T|Wellington is the capital city of New Zealand.|Parliament is in Wellington, next to a building called the Beehive.
-nz|F|Auckland is the capital of New Zealand.|Auckland is the biggest city, but Wellington is the capital.
-nz|T|Aoraki Mount Cook is the highest mountain in New Zealand.|Aoraki is in the Southern Alps in the South Island.
-nz|T|The moa was a giant bird that lived in New Zealand.|Some moa were taller than a grown-up. They died out hundreds of years ago.
-nz|F|The tuatara is a kind of frog.|The tuatara is a reptile found only in New Zealand. Its family goes back to the time of the dinosaurs.
-nz|T|Māori were the first people to live in New Zealand.|Māori sailed to New Zealand in waka hourua, double-hulled canoes, from Polynesia.
-nz|F|It snows in New Zealand at Christmas every year.|Christmas is in summer in New Zealand. Lots of people go to the beach.
-nz|T|Ruapehu is a volcano.|Mount Ruapehu is an active volcano in the North Island. People ski on it in winter.
-nz|F|Kangaroos live wild in New Zealand.|Kangaroos live wild in Australia, not New Zealand.
-nz|T|The pōhutukawa is called New Zealand's Christmas tree.|It has bright red flowers around Christmas time.
-nz|F|The silver fern grows only in Australia.|The silver fern is a New Zealand plant, and a symbol of the country.
-nz|T|The All Blacks are New Zealand's rugby team.|They do the haka before their games.
-nz|T|Rotorua has bubbling mud pools and geysers.|The ground there is heated by volcanoes deep below.
-nz|F|The kea is a parrot that lives in the hot desert.|The kea is a clever parrot that lives in the snowy mountains of the South Island.
-nz|T|Lake Taupō is the biggest lake in New Zealand.|Lake Taupō is in the middle of the North Island and was made by a huge volcano.
-nz|F|The Treaty of Waitangi was signed in the year 2000.|The Treaty of Waitangi was signed in 1840.
-nz|T|The tūī can make lots of different sounds.|Tūī can click, whistle and even copy other sounds.
-nz|F|New Zealand is in the Northern Hemisphere.|New Zealand is in the Southern Hemisphere, far south of the equator.
-nz|T|The Cook Strait is between the North Island and the South Island.|Ferries cross Cook Strait between Wellington and Picton.
-nz|T|Matariki is the Māori New Year.|Matariki is a group of stars. It rises in winter, and it is a public holiday.`;
+animals|T|A spider has eight legs.|Spiders have eight legs. Insects have six.|Spiders walk on eight legs.
+animals|F|A spider is an insect.|Spiders are not insects. They are arachnids, like scorpions.|Spiders belong to the insect family.
+animals|T|Wolves live and hunt in groups called packs.|A wolf pack is usually a family: parents and their pups.|A pack is a group of wolves that live and hunt together.
+animals|F|Bats are birds.|Bats are mammals. They are the only mammals that can really fly.|A bat is a kind of bird.
+animals|T|A whale is a mammal.|Whales breathe air and feed their babies milk, just like other mammals.|Whales belong to the mammal family, just like us.
+animals|F|Fish breathe air through their noses.|Fish take oxygen from the water through their gills.|Fish use their noses to breathe air.
+animals|T|An octopus has eight arms.|Octopus means eight feet. Each arm is covered in suckers.|Octopuses have eight arms.
+animals|T|A frog starts life as a tadpole.|Tadpoles live in water and slowly grow legs and lose their tails.|Before it is a frog, a baby frog is a tadpole.
+animals|F|Penguins can fly.|Penguins can't fly in the air, but they are amazing swimmers.|Penguins fly through the sky.
+animals|T|A cheetah is the fastest animal on land.|A cheetah can run as fast as a car on the motorway, but only for a short time.|No animal on land can run faster than a cheetah.
+animals|F|Snakes have legs.|Snakes have no legs. They move by bending their long bodies.|Snakes walk on legs.
+animals|T|Butterflies start life as caterpillars.|A caterpillar makes a chrysalis, and a butterfly comes out.|Every butterfly was once a caterpillar.
+animals|F|A baby kangaroo is called a cub.|A baby kangaroo is called a joey. It grows in its mother's pouch.|We call a baby kangaroo a cub.
+animals|T|Bees make honey.|Bees make honey from the nectar of flowers.|Honey is made by bees.
+animals|F|Owls only come out during the day.|Most owls hunt at night. They have big eyes to see in the dark.|Owls never come out at night.
+animals|T|Elephants are the biggest animals on land.|An African elephant can weigh as much as four cars.|No land animal is bigger than an elephant.
+animals|F|The blue whale is a small fish.|The blue whale is the biggest animal that has ever lived, and it is not a fish.|A blue whale is a little fish.
+animals|T|A group of fish swimming together is called a school.|Fish swim in schools to help keep safe from hunters.|We call a group of fish swimming together a school.
+animals|F|Wolves howl to tell the moon hello.|Wolves howl to talk to their pack, not to the moon.|Wolves howl to say hello to the moon.
+animals|T|Some animals sleep all winter.|This long winter sleep is called hibernation.|Some animals sleep right through the winter.
+animals|T|Sharks have lived on Earth longer than trees.|Sharks have been around for more than 400 million years.|Sharks were around before there were any trees.
+animals|F|Insects have eight legs.|Insects have six legs and three body parts.|An insect walks on eight legs.
+animals|T|A chameleon can change its colour.|Chameleons change colour to show how they feel and to warm up or cool down.|Chameleons can change colour.
+animals|F|Horses sleep only lying down.|Horses can sleep standing up. Their legs lock so they don't fall.|Horses can never sleep standing up.
+space|T|The Earth goes around the Sun.|It takes the Earth one year to go all the way around the Sun.|Our Earth travels around the Sun.
+space|F|The Sun goes around the Earth.|It's the other way around: the Earth goes around the Sun.|The Sun travels around our Earth.
+space|T|The Moon goes around the Earth.|The Moon takes about a month to go around the Earth once.|The Moon travels around our Earth.
+space|F|The Moon makes its own light.|The Moon shines because sunlight bounces off it.|The Moon shines with its very own light.
+space|T|The Sun is a star.|The Sun is a star. It looks big because it is the closest star to us.|Our Sun is one of the stars.
+space|F|Stars are tiny, much smaller than the Earth.|Most stars are huge. They only look small because they are very far away.|Stars are much smaller than our Earth.
+space|T|There are eight planets in our solar system.|Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus and Neptune.|Our solar system has eight planets.
+space|T|Jupiter is the biggest planet.|More than a thousand Earths could fit inside Jupiter.|No planet is bigger than Jupiter.
+space|F|Mars is called the Blue Planet.|Mars is the Red Planet. Earth is sometimes called the Blue Planet.|People call Mars the Blue Planet.
+space|T|Saturn has rings around it.|Saturn's rings are made of ice and rock.|There are rings around the planet Saturn.
+space|F|People have walked on Mars.|People have walked on the Moon, but not on Mars yet. Robots have driven on Mars.|Astronauts have stepped on Mars.
+space|T|People have walked on the Moon.|The first people walked on the Moon in 1969.|Astronauts have stepped on the Moon.
+space|F|The Moon is made of cheese.|The Moon is made of rock and dust.|The Moon is a big ball of cheese.
+space|T|Mercury is the closest planet to the Sun.|Mercury is small and very hot in the day.|No planet is closer to the Sun than Mercury.
+space|F|In space you can hear sounds easily.|Space has no air, so sound can't travel there.|Sounds are easy to hear in space.
+space|T|A day is how long the Earth takes to spin around once.|The Earth spins once every 24 hours. That gives us day and night.|The Earth spins around once in one day.
+space|F|It is night everywhere on Earth at the same time.|When it is night in New Zealand, it is day on the other side of the world.|When it is night for us, it is night all over the world.
+space|T|Astronauts float inside a space station.|They float because they are falling around the Earth all the time.|Inside a space station, astronauts float around.
+space|F|The Sun is cold.|The Sun is extremely hot. Never look straight at it.|The Sun is a cold star.
+space|T|Venus is the hottest planet.|Venus has thick clouds that trap heat, so it is even hotter than Mercury.|No planet is hotter than Venus.
+space|F|The Moon looks the same shape every night.|The Moon seems to change shape: new moon, crescent, half moon and full moon.|Every night, the Moon looks exactly the same shape.
+space|T|A full moon looks like a whole round circle.|At full moon, the side facing us is all lit up by the Sun.|When the Moon is full, it looks like a round circle.
+space|T|A shooting star is really a piece of space rock burning up.|It glows as it rushes through the air high above us.|Shooting stars are bits of space rock burning up in the sky.
+earth|T|Most of the Earth is covered by water.|About seven tenths of the Earth is covered by oceans.|Water covers most of the Earth.
+earth|F|The Pacific Ocean is the smallest ocean.|The Pacific is the biggest ocean in the world. New Zealand is in it.|No ocean is smaller than the Pacific.
+earth|T|A volcano can shoot out hot melted rock.|Melted rock is called lava when it comes out of a volcano.|Hot melted rock can come out of a volcano.
+earth|F|Mount Everest is the smallest mountain in the world.|Mount Everest is the tallest mountain above the sea in the world.|Mount Everest is the tiniest mountain in the world.
+earth|T|Water freezes into ice when it gets very cold.|Water freezes at zero degrees Celsius.|Very cold water turns into ice.
+earth|F|Rain falls from the ground up to the sky.|Rain falls down from clouds. The Sun lifts water up into the sky as invisible vapour.|Rain goes up from the ground into the sky.
+earth|T|Plants need sunlight to grow.|Plants use sunlight to make their own food.|To grow, plants need light from the Sun.
+earth|F|Deserts get lots of rain.|Deserts get very little rain. Some are hot, and some are cold.|It rains a lot in deserts.
+earth|T|Antarctica is the coldest place on Earth.|Antarctica is covered in thick ice all year.|No place on Earth is colder than Antarctica.
+earth|F|There are ten continents.|There are seven continents: Africa, Antarctica, Asia, Australia, Europe, North America and South America.|The world has ten continents.
+earth|T|A rainbow can appear when the Sun shines through rain.|Raindrops split sunlight into all its colours.|When sunlight shines through rain, you might see a rainbow.
+earth|F|Thunder comes before lightning.|Lightning comes first. We hear thunder later because sound travels slower than light.|You hear the thunder before you see the lightning.
+earth|T|Trees give us oxygen to breathe.|Trees and plants take in carbon dioxide and give out oxygen.|Trees make oxygen that we breathe.
+earth|F|Earthquakes only happen in the sea.|Earthquakes happen on land and under the sea, when the ground suddenly moves.|Earthquakes never happen on land.
+earth|T|The Nile is one of the longest rivers in the world.|The Nile flows through Africa into the Mediterranean Sea.|The Nile is a very long river, one of the longest on Earth.
+earth|F|The sea is fresh water you can drink.|Sea water is salty. Drinking it makes you thirstier.|Sea water is fresh water that is safe to drink.
+earth|T|Clouds are made of tiny drops of water.|When lots of drops join together, they fall as rain.|Clouds are made of lots of tiny water drops.
+earth|F|Snow is warm.|Snow is frozen water, so it is cold.|Snow feels warm.
+earth|T|Wind is moving air.|Wind happens when air moves from one place to another.|When air moves, we call it wind.
+earth|T|The Amazon is a huge rainforest.|The Amazon rainforest in South America is home to millions of kinds of living things.|The Amazon is a giant rainforest.
+earth|F|Diamonds are soft.|Diamonds are the hardest natural thing on Earth.|Diamonds are soft and squishy.
+earth|T|Magnets can pull things made of iron.|A magnet pulls iron and steel, but not wood or plastic.|A magnet can pull on things made of iron.
+earth|F|A seed needs to be in the dark freezer to grow.|A seed needs water, warmth and soil to start growing.|Seeds grow best in a dark freezer.
+body|T|Your heart pumps blood around your body.|Your heart beats about a hundred thousand times a day.|Your heart pushes blood all around your body.
+body|F|Your brain is in your tummy.|Your brain is inside your head, protected by your skull.|Your brain is inside your tummy.
+body|T|You have more than 200 bones in your body.|A grown-up has 206 bones. Babies have even more, and some join up as they grow.|Your body has over 200 bones.
+body|F|Your teeth are made of wood.|Teeth are covered in enamel, the hardest thing in your body.|Teeth are made of wood.
+body|T|Your lungs help you breathe.|Your lungs take in air, and your blood carries the oxygen around your body.|You breathe with the help of your lungs.
+body|F|You have five hands.|You have two hands, with five fingers on each.|People have five hands.
+body|T|You have five senses.|Sight, hearing, smell, taste and touch.|People have five senses, like seeing and hearing.
+body|F|You taste food with your ears.|You taste food with your tongue, and your nose helps too.|Your ears are what you taste food with.
+body|T|Your skin is the biggest part of your body.|Skin covers your whole body and keeps germs out.|Your skin is bigger than any other part of your body.
+body|F|Sleep is not important for children.|Sleep helps your body grow and your brain remember what you learned.|Children don't need sleep.
+body|T|Drinking water is good for your body.|Your body is more than half water.|Drinking water helps keep your body healthy.
+body|T|Your muscles help you move.|Muscles pull on your bones to move them.|Muscles are what help you move.
+body|F|Your eyes can see in complete darkness.|Eyes need light to see. In complete darkness we can't see anything.|When it is totally dark, your eyes can still see.
+body|T|Washing your hands helps stop germs.|Soap and water wash germs off your hands.|Washing your hands helps keep germs away.
+body|T|Your heart is a muscle.|It is a very strong muscle that never stops working.|The heart is a kind of muscle.
+body|F|Babies have no bones at all.|Babies have bones. They actually have more than grown-ups.|Babies are born with no bones.
+body|T|Your fingerprints are different from everyone else's.|Even twins have different fingerprints.|No one else has fingerprints just like yours.
+body|F|Your blood is blue inside your body.|Your blood is always red. Veins can look blue through your skin.|Inside your body, your blood is blue.
+body|T|Your nose can tell thousands of different smells apart.|Smell also helps you taste your food.|Your nose can tell apart thousands of smells.
+body|F|Sugar is good for your teeth.|Sugar helps germs damage your teeth. Brush twice a day.|Eating sugar is good for your teeth.
+body|T|Your bones are alive and growing.|Bones grow and can even mend themselves when they break.|Your bones are living, and they grow.
+history|T|The ancient Egyptians built the pyramids.|The Great Pyramid was built more than 4,000 years ago.|The pyramids were built by the ancient Egyptians.
+history|F|Dinosaurs and people lived at the same time.|Dinosaurs died out about 66 million years before the first people.|People and dinosaurs were alive at the same time.
+history|T|The Romans built long straight roads.|Some Roman roads are still used today, about 2,000 years later.|The Romans made long straight roads.
+history|F|Knights lived in spaceships.|Knights lived in the Middle Ages, long before spaceships. Many lived in castles.|Knights flew around in spaceships.
+history|T|People used to write with feathers dipped in ink.|A feather pen is called a quill.|Long ago, people dipped feathers in ink to write.
+history|F|Cars were invented before the wheel.|The wheel was invented thousands of years before cars.|People had cars before they had wheels.
+history|T|The Vikings sailed in long wooden boats.|Viking longships could sail on the sea and up rivers.|The Vikings sailed in boats made of wood.
+history|F|The first aeroplane flight lasted a whole day.|The first powered plane flight in 1903 lasted only 12 seconds.|The first plane flight went on for a whole day.
+history|T|Ancient Greeks held the first Olympic Games.|The first Olympics were held in Olympia, Greece, almost 3,000 years ago.|The first Olympic Games were held by the ancient Greeks.
+history|F|Mobile phones are thousands of years old.|The first mobile phones were made about fifty years ago.|People had mobile phones thousands of years ago.
+history|T|The ancient Egyptians wrote with pictures called hieroglyphs.|Hieroglyphs used little pictures for sounds and ideas.|Hieroglyphs are picture writing from ancient Egypt.
+history|F|Castles were built out of paper.|Castles were built from stone so they were strong.|People built castles out of paper.
+history|T|Long ago, people lit their homes with candles and lamps.|Electric light bulbs only became common about a hundred years ago.|Long ago, candles and lamps lit people's homes.
+history|T|Russia is the biggest country in the world.|Russia is so wide that it covers eleven time zones.|No country in the world is bigger than Russia.
+history|F|Christopher Columbus sailed to the Moon.|Columbus sailed across the Atlantic Ocean in 1492.|Christopher Columbus sailed all the way to the Moon.
+history|T|People once lived in caves and painted on the walls.|Some cave paintings are more than 30,000 years old.|Long ago, some people lived in caves and painted pictures on the walls.
+history|F|The Great Wall of China is very short.|The Great Wall of China is thousands of kilometres long.|The Great Wall of China is only a little wall.
+history|T|Before fridges, people kept food cold with ice.|Ice was cut from frozen lakes and stored in ice houses.|People used ice to keep food cold before there were fridges.
+history|F|Ancient Romans watched television.|There was no television until about a hundred years ago.|People in ancient Rome watched TV.
+history|T|Some kings and queens wore crowns.|A crown showed that a person was a ruler.|Some kings and queens wore crowns on their heads.
+history|F|The printing press was invented last year.|The printing press was invented almost 600 years ago, so books could be made faster.|The printing press was only invented last year.
+history|T|Mummies were made in ancient Egypt.|The Egyptians wrapped bodies in cloth to keep them for the afterlife.|Ancient Egypt is where mummies were made.
+nz|T|The kiwi is a bird that cannot fly.|The kiwi is New Zealand's national bird. It hunts for food at night.|Kiwi are birds that can't fly.
+nz|F|New Zealand has snakes living in the wild.|New Zealand has no wild land snakes.|Wild snakes live in New Zealand.
+nz|T|Aotearoa is the Māori name for New Zealand.|Many people say Aotearoa means land of the long white cloud.|In Māori, New Zealand is called Aotearoa.
+nz|F|New Zealand is one big island.|New Zealand has two main islands, the North Island and the South Island, and many small ones.|New Zealand is just one island.
+nz|T|Wellington is the capital city of New Zealand.|Parliament is in Wellington, next to a building called the Beehive.|New Zealand's capital city is Wellington.
+nz|F|Auckland is the capital of New Zealand.|Auckland is the biggest city, but Wellington is the capital.|New Zealand's capital city is Auckland.
+nz|T|Aoraki Mount Cook is the highest mountain in New Zealand.|Aoraki is in the Southern Alps in the South Island.|No mountain in New Zealand is higher than Aoraki Mount Cook.
+nz|T|The moa was a giant bird that lived in New Zealand.|Some moa were taller than a grown-up. They died out hundreds of years ago.|Long ago, a giant bird called the moa lived in New Zealand.
+nz|F|The tuatara is a kind of frog.|The tuatara is a reptile found only in New Zealand. Its family goes back to the time of the dinosaurs.|A tuatara is a type of frog.
+nz|T|Māori were the first people to live in New Zealand.|Māori sailed to New Zealand in waka hourua, double-hulled canoes, from Polynesia.|The first people to live in New Zealand were Māori.
+nz|F|It snows in New Zealand at Christmas every year.|Christmas is in summer in New Zealand. Lots of people go to the beach.|Every Christmas, it snows in New Zealand.
+nz|T|Ruapehu is a volcano.|Mount Ruapehu is an active volcano in the North Island. People ski on it in winter.|Mount Ruapehu is a volcano.
+nz|F|Kangaroos live wild in New Zealand.|Kangaroos live wild in Australia, not New Zealand.|Wild kangaroos live in New Zealand.
+nz|T|The pōhutukawa is called New Zealand's Christmas tree.|It has bright red flowers around Christmas time.|People call the pōhutukawa New Zealand's Christmas tree.
+nz|F|The silver fern grows only in Australia.|The silver fern is a New Zealand plant, and a symbol of the country.|You can only find the silver fern in Australia.
+nz|T|The All Blacks are New Zealand's rugby team.|They do the haka before their games.|New Zealand's rugby team is the All Blacks.
+nz|T|Rotorua has bubbling mud pools and geysers.|The ground there is heated by volcanoes deep below.|In Rotorua you can see bubbling mud and geysers.
+nz|F|The kea is a parrot that lives in the hot desert.|The kea is a clever parrot that lives in the snowy mountains of the South Island.|Kea are parrots that live in hot deserts.
+nz|T|Lake Taupō is the biggest lake in New Zealand.|Lake Taupō is in the middle of the North Island and was made by a huge volcano.|No lake in New Zealand is bigger than Lake Taupō.
+nz|F|The Treaty of Waitangi was signed in the year 2000.|The Treaty of Waitangi was signed in 1840.|People signed the Treaty of Waitangi in the year 2000.
+nz|T|The tūī can make lots of different sounds.|Tūī can click, whistle and even copy other sounds.|A tūī can make many different sounds.
+nz|F|New Zealand is in the Northern Hemisphere.|New Zealand is in the Southern Hemisphere, far south of the equator.|New Zealand is in the top half of the world.
+nz|T|The Cook Strait is between the North Island and the South Island.|Ferries cross Cook Strait between Wellington and Picton.|The sea between the North Island and the South Island is called Cook Strait.
+nz|T|Matariki is the Māori New Year.|Matariki is a group of stars. It rises in winter, and it is a public holiday.|The Māori New Year is called Matariki.`;
 const GKT={animals:{e:'🐾',n:'Animals'},space:{e:'🚀',n:'Space'},earth:{e:'🌏',n:'Earth'},body:{e:'🦴',n:'Body'},history:{e:'🏛️',n:'History'},nz:{e:'🥝',n:'New Zealand'}};
-const GKQ=GKRAW.split(String.fromCharCode(10)).map(l=>l.trim()).filter(l=>l&&l[0]!=='#').map(l=>{ const f=l.split('|'); return {topic:f[0], yes:f[1]==='T', q:f[2], fact:f[3]||'', id:(f[0]+'-'+(f[2]||'')).toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,70)}; }).filter(x=>x.q && GKT[x.topic]);
+const GKQ=GKRAW.split(String.fromCharCode(10)).map(l=>l.trim()).filter(l=>l&&l[0]!=='#').map(l=>{ const f=l.split('|'); return {topic:f[0], yes:f[1]==='T', q:f[2], fact:f[3]||'', q2:f[4]||'', id:(f[0]+'-'+(f[2]||'')).toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,70)}; }).filter(x=>x.q && GKT[x.topic]);
 const GK_ROUND=10;
 let gk=null;
 const gkSeen=()=>state.gk||(state.gk={q:{},rounds:0});
@@ -4737,41 +4742,66 @@ function pickGk(topic){
 }
 function startGk(topic){
   hush(); const list=pickGk(topic); if(!list.length) return;
-  gk={topic, list, i:0, right:0, answered:false}; view='gkplay'; render(); gkAsk(true);
+  gk={topic, list, i:0, right:0, answered:false, taps:0}; view='gkplay'; render(); gkAsk(true);
 }
-function gkAsk(first){ const Q=gk.list[gk.i]; say((first?['True or false? Swipe up for yes. Swipe down for no.',{pause:500}]:[]).concat([Q.q])); }
+function gkAsk(first){ const Q=gk.list[gk.i]; say((first?['True or false? Swipe up for yes. Swipe down for no. Swipe right if you don’t know.',{pause:500}]:[]).concat([Q.q])); }
+/* Tapping the moon: 1 and 2 say it again, 3 slower, 4 slower still, 5 in other words, then round again. */
+const GK_TAPS=[{},{},{slow:0.8},{slow:0.65},{other:true}];
+function gkTap(){
+  const Q=gk.list[gk.i];
+  if(gk.answered) return say([Q.fact],{noRemember:true,need:true});
+  const k=gk.taps%GK_TAPS.length, m=GK_TAPS[k]; gk.taps++;
+  const text=(m.other && Q.q2) ? Q.q2 : Q.q;
+  const el=$('#gkQ'); if(el) el.textContent=text;
+  hush(); say([text],{noRemember:true,need:true,slow:m.slow});
+}
 function renderGkPlay(){
   if(!gk){ view='gk'; return render(); }
   const Q=gk.list[gk.i], a=gk.answered;
+  const fb=gk.skipped ? `<p class="say">It’s ${Q.yes?'true':'false'}.</p>` : `<p class="say ${gk.ok?'good':'try'}">${gk.ok?'That’s right!':'Not quite: it’s '+(Q.yes?'true':'false')+'.'}</p>`;
   stage.innerHTML=`<section class="gkplay" id="gkArea">
     <button class="gkhint up" type="button" id="gkYes" style="${a?'visibility:hidden':''}">▲ Yes / True</button>
-    <p class="gkq">${esc(Q.q)}</p>
-    <button class="gkmoon" type="button" id="gkMoon" aria-label="Hear it again">${a?(gk.ok?'✓':'✗'):''}</button>
-    ${a?`<div class="gkfb pop"><p class="say ${gk.ok?'good':'try'}">${gk.ok?'That’s right!':'Not quite: it’s '+(Q.yes?'true':'false')+'.'}</p><p>${esc(Q.fact)}</p></div>${nextHTML}`
+    <p class="gkq" id="gkQ">${esc(Q.q)}</p>
+    <div class="gkmid"><span></span><button class="gkmoon" type="button" id="gkMoon" aria-label="Hear it again">${a?(gk.skipped?'?':gk.ok?'✓':'✗'):''}</button>${a?'<span></span>':'<button class="gkskip" type="button" id="gkSkip">Skip ▶</button>'}</div>
+    ${a?`<div class="gkfb pop">${fb}<p>${esc(Q.fact)}</p></div>${nextHTML}`
       :`<button class="gkhint down" type="button" id="gkNo">▼ No / False</button>`}
   </section>`;
-  const area=$('#gkArea'); let y0=null;
-  area.onpointerdown=e=>{ y0=e.clientY; };
-  area.onpointerup=e=>{ if(y0==null) return; const dy=e.clientY-y0; y0=null; if(Math.abs(dy)>45){ gk.swiped=Date.now(); gkSwipe(dy<0); } };
-  area.onpointercancel=()=>{ y0=null; };
+  const area=$('#gkArea'); let p0=null;
+  area.onpointerdown=e=>{ p0={x:e.clientX,y:e.clientY}; };
+  area.onpointerup=e=>{ if(!p0) return; const dx=e.clientX-p0.x, dy=e.clientY-p0.y; p0=null;
+    if(dx>60 && Math.abs(dx)>Math.abs(dy)){ gk.swiped=Date.now(); gkSkip(); }
+    else if(Math.abs(dy)>45 && Math.abs(dy)>=Math.abs(dx)){ gk.swiped=Date.now(); gkSwipe(dy<0); } };
+  area.onpointercancel=()=>{ p0=null; };
   const tap=fn=>()=>{ if(gk && Date.now()-(gk.swiped||0)<450) return; fn(); };
-  $('#gkMoon').onclick=tap(()=>{ if(gk.answered) say([Q.fact],{noRemember:true,need:true}); else say([Q.q],{noRemember:true,need:true}); });
+  $('#gkMoon').onclick=tap(gkTap);
   const y=$('#gkYes'); if(y) y.onclick=tap(()=>gkSwipe(true));
   const n=$('#gkNo'); if(n) n.onclick=tap(()=>gkSwipe(false));
+  const s=$('#gkSkip'); if(s) s.onclick=tap(gkSkip);
   const nb=$('#nextBtn'); if(nb) nb.onclick=tap(gkNext);
 }
 function gkSwipe(up){ if(!gk) return; if(gk.answered) return gkNext(); gkAnswer(up); }
+function gkMark(ok){ const Q=gk.list[gk.i], all=gkSeen().q, s=all[Q.id]||(all[Q.id]={r:0,w:0}); if(ok) s.r++; else s.w++; s.last=Date.now(); save(); }
 function gkAnswer(yes){
   const Q=gk.list[gk.i], ok=(yes===Q.yes);
-  gk.answered=true; gk.ok=ok; if(ok) gk.right++;
-  const all=gkSeen().q, s=all[Q.id]||(all[Q.id]={r:0,w:0}); if(ok) s.r++; else s.w++; s.last=Date.now(); save();
+  gk.answered=true; gk.ok=ok; gk.skipped=false; if(ok) gk.right++;
+  gkMark(ok);
   hush(); chime(ok?'good':'try');
   const m=$('#gkMoon'); if(m) m.classList.add(yes?'flyup':'flydown');
   later(()=>{ if(view!=='gkplay'||!gk) return; render(); say([ok?pick(['That’s right!','Well done!','Yes!']):`Not quite. It’s ${Q.yes?'true':'false'}.`, {pause:300}, Q.fact],{noRemember:true}); },380);
 }
+/* Swipe right: she doesn't know, so just tell her. It counts as one to come back to. */
+function gkSkip(){
+  if(!gk) return; if(gk.answered) return gkNext();
+  const Q=gk.list[gk.i];
+  gk.answered=true; gk.ok=false; gk.skipped=true;
+  gkMark(false);
+  hush();
+  const m=$('#gkMoon'); if(m) m.classList.add('flyright');
+  later(()=>{ if(view!=='gkplay'||!gk) return; render(); say([`It’s ${Q.yes?'true':'false'}.`, {pause:300}, Q.fact],{noRemember:true}); },380);
+}
 function gkNext(){
   if(!gk || !gk.answered) return;
-  clearTimers(); hush(); gk.i++; gk.answered=false;
+  clearTimers(); hush(); gk.i++; gk.answered=false; gk.skipped=false; gk.taps=0;
   if(gk.i>=gk.list.length){ const r=gk.right, n=gk.list.length; gkSeen().rounds=(gkSeen().rounds||0)+1; save(); gk=null; view='gk'; render();
     chime('full'); toast(`🌍 You got ${r} of ${n}!`); say([`You got ${r} out of ${n}. Well done!`],{noRemember:true}); return; }
   render(); gkAsk();
@@ -4798,6 +4828,7 @@ document.addEventListener('keydown',ev=>{
   if(view==='gkplay' && gk){
     if(ev.key==='ArrowUp'){ ev.preventDefault(); gkSwipe(true); }
     else if(ev.key==='ArrowDown'){ ev.preventDefault(); gkSwipe(false); }
+    else if(ev.key==='ArrowRight'){ ev.preventDefault(); gkSkip(); }
     else if(ev.key==='Enter' && gk.answered){ ev.preventDefault(); gkNext(); }
     return;
   }
@@ -4831,6 +4862,6 @@ if(STANDALONE){ try{ if(/^#restore=/.test(location.hash)){ const code=decodeURIC
   grownTab='backup'; openGrown(); const t=$('#bkIn'); if(t){ t.value=code; $('#bkLoad').click(); setTimeout(()=>{ const b=$('#bkLoad'); if(b) b.scrollIntoView({block:'center'}); },500); } } }catch(e){} }
 })();
 </script>
-<script>if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('sw.js?v=202611162203').catch(function(){});});}</script>
+<script>if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('sw.js?v=202611170020').catch(function(){});});}</script>
 </body>
 </html>
